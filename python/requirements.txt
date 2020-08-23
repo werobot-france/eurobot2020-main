@@ -6,3 +6,5 @@ websocket_server
 websocket-client
 pygments-json
 prompt_toolkit
+
+gpiozero
