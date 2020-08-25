@@ -2,6 +2,9 @@
 
 ## installation
 
+- install I2c tools to get i2cdetect utility
+- `sudo apt install -y i2c-tools`
+
 - Install node >= 10 with [this bash script](https://github.com/retrobox/console-modules/blob/master/v3.06/installnode.sh)
     - `wget https://github.com/retrobox/console-modules/blob/master/v3.06/installnode.sh && ./installnode.sh && rm installnode.sh`
 - Install `arduino-cli`:
