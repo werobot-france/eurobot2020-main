@@ -12,7 +12,8 @@ from src.WebSocketServer import WebSocketServer
 from src.CommandsManager import CommandsManager
 from src.ArduinoManager import ArduinoManager
 from src.Scripts import Scripts
-from src.Elevator import Elevator
+#from src.Elevator import Elevator
+from src.Claw import Claw
 from time import sleep
 from src.Logger import LoggerManager
 
@@ -27,9 +28,9 @@ if __name__ == '__main__':
   ws = WebSocketServer(container)
   container.set('websocket', ws)
 
-  arduinoManager = ArduinoManager(container)
-  arduinoManager.identify()
-  container.set('arduinoManager', arduinoManager)
+  # arduinoManager = ArduinoManager(container)
+  # arduinoManager.identify()
+  # container.set('arduinoManager', arduinoManager)
   
   scripts = Scripts(container)
   container.set('scripts', scripts)
@@ -44,11 +45,11 @@ if __name__ == '__main__':
   #positionWatcher.start()
   container.set('positionWatcher', positionWatcher)
 
-  switches = Switches(container)
-  container.set('switches', switches)
+  # switches = Switches(container)
+  # container.set('switches', switches)
 
   driver = PWMDriver()
-  container.set('PWMDriver', driver)
+  container.set('driver', driver)
 
   platform = MotorizedPlatform(container)
   container.set('platform', platform)
@@ -56,12 +57,15 @@ if __name__ == '__main__':
   navigation = Navigation(container)
   container.set('navigation', navigation)
   
-  elevator = Elevator(container)
-  container.set('elevator', elevator)
+  rightClaw = Claw(container, {'elevator': 7, 'claws': [6, 5, 4]})
+  container.set('rightClaw', rightClaw)
+  
+  # elevator = Elevator(container)
+  # container.set('elevator', elevator)
 
-  # lidar = Lidar(container)
-  # lidar.start()
-  # container.set('lidar', lidar)
+  lidar = Lidar(container)
+  container.set('lidar', lidar)
+  
   commandsManager.init()
 
   def onPos(x, y, t):
@@ -70,8 +74,9 @@ if __name__ == '__main__':
   positionWatcher.setPositionChangedHandler(onPos)
 
   def app():
-    switches.start()
+    #switches.start()
     ws.start()
+    #lidar.start()
     sleep(1)
     platform.stop()
     sleep(1)
@@ -91,12 +96,12 @@ if __name__ == '__main__':
   except KeyboardInterrupt:
     print('')
     root.error('KeyboardInterrupt: App will shutdown in a few moments')
-    switches.stop()
+    #switches.stop()
     scripts.stop()
     navigation.stop()
     positionWatcher.stop()
     platform.stop()
-    elevator.stop()
+    #elevator.stop()
     ws.stop()
     platform.stop()
     sys.exit()

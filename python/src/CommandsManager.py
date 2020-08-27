@@ -7,7 +7,7 @@ class CommandsManager:
     goToArgs = [
       ['x', True], ['y', True],
       ['theta', False],
-      ['speed', False], ['stopOn', False]
+      ['speed', False], ['stopOn', False], ['backward', False]
     ]
     self.commands = [
       {
@@ -76,17 +76,23 @@ class CommandsManager:
         'arguments': [['name', True]],
         'handler': self.execScript
       },
-      {
-        'name': 'elevator',
-        'description': 'Stepper goto or origin',
-        'arguments': [['steps', True], ['speed', False]],
-        'handler': self.elevator
-      },
+      # {
+      #   'name': 'elevator',
+      #   'description': 'Stepper goto or origin',
+      #   'arguments': [['steps', True], ['speed', False]],
+      #   'handler': self.elevator
+      # },
       {
         'name': 'claws',
         'description': 'Set angle of claws servo',
         'arguments': [['angle', True], ['select', False]],
         'handler': self.claws
+      },
+      {
+        'name': 'clawPos',
+        'description': 'Set pos of the claw',
+        'arguments': [['pos', True]],
+        'handler': self.clawPos
       },
       {
         'name': 'stop',
@@ -108,6 +114,7 @@ class CommandsManager:
     
   def init(self):
     self.positionWatcher = self.container.get('positionWatcher')
+    self.rightClaw = self.container.get('rightClaw')
     self.navigation = self.container.get('navigation')
     self.platform = self.container.get('platform')
     self.elevator = self.container.get('elevator')
@@ -218,17 +225,22 @@ class CommandsManager:
       components['steps'] = int(components['steps'])
       self.elevator.goTo(components['steps'], components['speed'])
     return 'OK'
+  
+  def clawPos(self, components):
+    components['pos'] = int(components['pos'])
+    self.rightClaw.directGoTo(components['pos'])
+    return 'OK'
 
   def claws(self, components):
     selector = None
     if 'select' in components:
       selector = eval(components['select'])
     if components['angle'] == 'open':
-      self.elevator.open(selector)
+      self.rightClaw.open(selector)
     elif components['angle'] == 'close':
-      self.elevator.close(selector)
+      self.rightClaw.close(selector)
     else: 
-      self.elevator.setClawsAngle(int(components['angle']), selector)
+      self.rightClaw.setClawsAngle(int(components['angle']), selector)
     return 'OK'
 
   def stop(self, _):
@@ -236,7 +248,7 @@ class CommandsManager:
     self.scripts.stop()
     self.navigation.stop()
     self.platform.stop()
-    self.elevator.stop()
+    self.rightClaw.stop()
     
     
   def parseAngleArgs(self, args):

@@ -23,22 +23,30 @@ class Lidar:
   mainThread = None
   watchDistancesThread = None
   communicateThread = None
+  
+  servoSlot = 0
 
   def __init__(self, container):
     self.serial = serial.Serial("/dev/ttyAMA0", 115200)
     self.websocket = container.get('websocket')
+    self.container = container
     self.positionWatcher = container.get('positionWatcher')
-    self.logger = self.container.get('logger').get('Lidar')
+    self.navigation = container.get('navigation')
+    self.logger = container.get('logger').get('Lidar')
+    self.driver = container.get('driver')
+    self.mustStop = False
+    self.mustStopTmp = False
+    # i2c = busio.I2C(SCL, SDA)
+    # self.pca = PCA9685(i2c)
+    # self.pca.frequency = 50
 
-    i2c = busio.I2C(SCL, SDA)
-    self.pca = PCA9685(i2c)
-    self.pca.frequency = 50
-
-    self.servo = servo.Servo(self.pca.channels[8])
-    self.servo.set_pulse_width_range(400, 2600)
+    # self.servo = servo.Servo(self.pca.channels[8])
+    # self.servo.set_pulse_width_range(400, 2600)
 
   def setAngle(self, angle):
-    self.servo.angle = angle
+    #self.servo.angle = angle
+    self.driver.setAngle(self.servoSlot, angle)
+    
 
   def computePointPosition(self, angle, distance):
     p = self.positionWatcher.getData()
@@ -64,23 +72,26 @@ class Lidar:
         if recv[0] == 0x59 and recv[1] == 0x59:
           self.dist = recv[2] + recv[3] * 256
           # self.buffer.append([self.angle, self.dist])
+          #print('wD', self.angle)
           Thread(target=self.communication, args = [[self.angle, self.dist]]).start()
           #if debug: print("angel:", self.angle*2, inc, pos)
   
   def run(self, debug=False):
     self.angle = 0
     self.inc = False
-    delta = 1
+    delta = 3
     while self.enabled:
-      sleep(0.009)
+      sleep(0.015)
       if self.angle >= 180 or self.angle <= 0:
         self.inc = not self.inc
       if self.angle >= 180:
         self.angle = 180
       if self.angle <= 0:
         self.angle = 0
+        Thread(target=self.communication, args = [False]).start()
       
-      self.servo.angle = self.angle
+      self.driver.setAngle(self.servoSlot, self.angle)
+      #print('r', self.angle)
 
       if self.inc:
         self.angle += delta
@@ -88,8 +99,39 @@ class Lidar:
         self.angle -= delta
 
   def communication(self, d):
-    pos = self.computePointPosition(d[0]*2, d[1]*10)
-    self.websocket.sendData('lidar', pos)
+    if d == False:
+      self.mustStop = self.mustStopTmp
+      self.mustStopTmp = False
+      if self.mustStop:
+        self.navigation.pause()
+        print('STOP! STOP!')
+      else:
+        self.navigation.resume()
+        print('NOTHING')
+      return
+    
+    #print(self.angle, self.dist)
+    angle = d[0] * 2
+    dist = d[1] * 10
+    
+    incli = math.radians(-10)
+    H =  340
+    d = math.cos(incli) * dist
+    A = abs(H - (math.sin(incli) * dist))
+    
+    isRobot = A > 70
+    isClose = d < 400
+    newStop = isRobot and isClose
+    if newStop:
+      self.mustStopTmp = True
+      self.mustStop = True
+      self.navigation.pause()
+      print('OWOWOWOWOWOOWO CALM DOWN')
+    
+    #print(, )
+    #pos = self.computePointPosition(d[0]*2, d[1]*10)
+    #self.websocket.sendData('lidar', pos)
+    #self.logger.debug([angle, dist])
   
   '''
   Will start to keep up to date the obstacles points
@@ -99,14 +141,15 @@ class Lidar:
     self.enabled = True
     self.inc = False
 
+    self.distanceWatcherThread = Thread(target=self.watchDistances)
+    self.distanceWatcherThread.start()
+    
     self.mainThread = Thread(target=self.run)
     self.mainThread.start()
 
     # self.distanceWatcherThread = Thread(target=self.watchDistances)
     # self.distanceWatcherThread.start()
 
-    self.distanceWatcherThread = Process(target=self.watchDistances)
-    self.distanceWatcherThread.start()
     
     # self.communicateThread = Thread(target=self.communication)
     # self.communicateThread.start()

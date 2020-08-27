@@ -7,33 +7,59 @@ from math import *
 This class manage all the odometry operations
 '''
 class PositionWatcher:
-  backPerimeter = 88*pi
-  lateralPerimeter = 60*pi
   
+  #-OLDHOLONOMIC%START
+  # backPerimeter = 88*pi
+  # lateralPerimeter = 60*pi
+  #-OLDHOLONOMIC%END
+  
+  perimeter = 205
+  
+  #-OLDHOLONOMIC%START
   # distance entre les deux encodeurs latéraux (milieux) (arrête de la base)
-  axialDistance = 284 #280
+  # axialDistance = 284 #280
   
-  # distance entre l'encodeur arrirère et la droite qui passe par les deux encodeurs latéraux
-  backAxialDistance = 110
+  # # distance entre l'encodeur arrirère et la droite qui passe par les deux encodeurs latéraux
+  # backAxialDistance = 110
+  #-OLDHOLONOMIC%END
   
+  axialDistance = 233.5
+  
+  #-OLDHOLONOMIC%START
   # coté bleu x: 979, y: 159
   # defaultX = 979
   # defaultY = 159
-  defaultX = 979
-  defaultY = 159
-  defaultTheta = pi
-
-  # left (scotch bleu) encodeur branché sur la prise du milieur
-  phaseA = DigitalInputDevice(20, True) # 20 
-  phaseB = DigitalInputDevice(21, True) # 21
+  # defaultX = 979
+  # defaultY = 159
+  # defaultTheta = pi
+  #-OLDHOLONOMIC%END
   
-  # right (sans scotch) encodeur branché côté carte sd
-  phaseC = DigitalInputDevice(16, True) # 16
-  phaseD = DigitalInputDevice(6, True) # 6
+  defaultX = 900
+  defaultY = 200
+  defaultTheta = pi/2
 
-  # back  (scotch vert) encodeur branché coté port USB
-  phaseE = DigitalInputDevice(5, True)
-  phaseF = DigitalInputDevice(19, True)
+  #-OLDHOLONOMIC%START
+  # left (scotch bleu) encodeur branché sur la prise du milieur
+  # phaseA = DigitalInputDevice(20, True) # 20 
+  # phaseB = DigitalInputDevice(21, True) # 21
+  
+  # # right (sans scotch) encodeur branché côté carte sd
+  # phaseC = DigitalInputDevice(16, True) # 16
+  # phaseD = DigitalInputDevice(6, True) # 6
+
+  # # back  (scotch vert) encodeur branché coté port USB
+  # phaseE = DigitalInputDevice(5, True)
+  # phaseF = DigitalInputDevice(19, True)
+  #-OLDHOLONOMIC%END
+  
+  # left (scotch rouge) encodeur
+  phaseA = DigitalInputDevice(16, True)
+  phaseB = DigitalInputDevice(6, True)
+  
+  # right (sans scotch) encodeur
+  phaseC = DigitalInputDevice(19, True)
+  phaseD = DigitalInputDevice(5, True)
+
   
   watchPositionThread = None
   watchTicksThread = None
@@ -54,14 +80,14 @@ class PositionWatcher:
     self.ignoreXChanges = val
   
   '''
-  This thread will keep updated the left, right and back tick count
+  This thread will keep updated all the ticks counts
   '''
   def watchTicks(self):
     self.logger.info('WatchTicks thread START!')
     while self.watchTicksEnabled:
       leftFetchedState = (self.phaseA.value, self.phaseB.value)
       rightFetchedState = (self.phaseC.value, self.phaseD.value)
-      backFetchedState = (self.phaseE.value, self.phaseF.value)
+      #backFetchedState = (self.phaseE.value, self.phaseF.value)
       
       if not self.ignoreXChanges:
         if leftFetchedState != self.leftState:
@@ -84,49 +110,52 @@ class PositionWatcher:
 
           self.rightOldState = self.rightState
 
-      if backFetchedState != self.backState:
-        self.backState = backFetchedState
+      # if backFetchedState != self.backState:
+      #   self.backState = backFetchedState
 
-        if self.backState[0] == self.backOldState[1]:
-          self.backTicks -= 1
-        else:
-          self.backTicks += 1
+      #   if self.backState[0] == self.backOldState[1]:
+      #     self.backTicks -= 1
+      #   else:
+      #     self.backTicks += 1
 
-        self.backOldState = self.backState
+      #   self.backOldState = self.backState
     self.logger.info("WatchTicks thread QUIT!")
 
   '''
   /!\ Call once
   '''
   def computePosition(self):
-    newTicks = (self.leftTicks, self.rightTicks, self.backTicks)
+    newTicks = (self.leftTicks, self.rightTicks)
     if (newTicks != self.oldTicks):
+      #-OLDHOLONOMIC%START
       deltaTicks = (
         newTicks[0] - self.oldTicks[0],
         newTicks[1] - self.oldTicks[1],
-        newTicks[2] - self.oldTicks[2]
+        #newTicks[2] - self.oldTicks[2]
       )
       self.oldTicks = newTicks
       
-      leftDistance = deltaTicks[0] / 2400 * self.lateralPerimeter
-      rightDistance = deltaTicks[1] / 2400 * self.lateralPerimeter
-      backDistance = deltaTicks[2] / 2400 * self.backPerimeter
+      leftDistance = deltaTicks[0] / 2400 * self.perimeter
+      rightDistance = deltaTicks[1] / 2400 * self.perimeter
+      #backDistance = deltaTicks[2] / 2400 * self.backPerimeter
 
-      #tb = (leftDistance + rightDistance) / 2
+      tb = (leftDistance + rightDistance) / 2
       #deltaTheta = 2 * asin((rightDistance - tb) / self.axialDistance)
       # print(self.axialDistance)
       deltaTheta = (rightDistance - leftDistance) / self.axialDistance
       
-      backDistance -= deltaTheta*self.backAxialDistance
-      rightDistance -= deltaTheta*self.axialDistance/2
+      # backDistance -= deltaTheta*self.backAxialDistance
+      # rightDistance -= deltaTheta*self.axialDistance/2
       
-      c = 0 if self.ignoreXChanges else 1
+      # c = 0 if self.ignoreXChanges else 1
       
       self.theta += deltaTheta
       self.theta = self.theta % (2*pi)
-      self.x += cos(self.theta) * rightDistance + sin(self.theta) * backDistance * c
-      self.y += sin(self.theta) * rightDistance - cos(self.theta) * backDistance
-      
+      # self.x += cos(self.theta) * rightDistance + sin(self.theta) * backDistance * c
+      # self.y += sin(self.theta) * rightDistance - cos(self.theta) * backDistance
+      self.x += cos(self.theta) * tb
+      self.y += sin(self.theta) * tb
+
       if self.positionChangedHandler != None:
         self.positionChangedHandler(self.x, self.y, self.theta)
 
@@ -174,7 +203,8 @@ class PositionWatcher:
     self.positionChangedHandler = handler
 
   def getTicks(self):
-    return (self.leftTicks, self.rightTicks, self.backTicks)
+    #return (self.leftTicks, self.rightTicks, self.backTicks)
+    return (self.leftTicks, self.rightTicks)
   
   def getPos(self):
     return (self.x, self.y, self.theta)

@@ -8,3 +8,4 @@ pygments-json
 prompt_toolkit
 
 gpiozero
+adafruit-circuitpython-servokit

@@ -7,9 +7,7 @@ class WrapperThread(threading.Thread):
   def __init__(self, target):
     super().__init__()
     self.target = target
-
-  def run(self):
-    self.target()
+    self.run = self.target
     
 class Thread:
   def __init__(self, target):
