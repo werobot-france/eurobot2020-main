@@ -19,7 +19,7 @@ positionWatcher.start()
 container.set('positionWatcher', positionWatcher)
 
 driver = PWMDriver()
-container.set('PWMDriver', driver)
+container.set('driver', driver)
 
 platform = MotorizedPlatform(container)
 container.set('platform', platform)
@@ -42,23 +42,9 @@ def app():
   input('Start ?')
   positionWatcher.reset()
   sleep(0.3)
-
-  nav.goTo(x=-500, y=500)
-  nav.orientTo(theta=pi/2)
-  logPos()
-  input("continue...")
-  nav.goTo(x=-500, y=0)
-  nav.orientTo(theta=pi)
-  logPos()
-  input("continue...")
-  nav.goTo(x=0, y=-500)
-  nav.orientTo(theta=3*pi/2)
-  logPos()
-  input("continue...")
-  nav.goTo(x=0, y=0)
-  nav.orientTo(theta=pi/2)
-  logPos()
-  input("continue...")
+  while True:
+    nav.orientTo(theta=radians(int(input("orientTo: "))))
+  #nav.goTo(x=-500, y=500, speed=100)
 
 try:
   app()
@@ -67,4 +53,3 @@ except KeyboardInterrupt:
   positionWatcher.stop()
   platform.stop()
   sys.exit()
-

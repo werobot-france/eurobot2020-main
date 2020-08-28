@@ -212,6 +212,15 @@ class PositionWatcher:
   def getData(self):
     return (self.x, self.y, self.theta)
   
+  def getX(self):
+    return self.x
+  
+  def getY(self):
+    return self.y
+  
+  def getTheta(self):
+    return self.theta
+
   def setPos(self, x = None, y = None, theta = None):
     if x != None:
       self.x = x

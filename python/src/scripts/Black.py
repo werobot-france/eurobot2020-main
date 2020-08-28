@@ -8,11 +8,13 @@ class Black(API):
     self.rightClaw.open()
     self.rightClaw.directGoTo(0)
     
-    self.navigation.goTo(x=134, y=950, speed=25)
+    self.navigation.goTo(x=300, y=1300, speed=85)
+    self.navigation.orientTo(theta=radians(200))
+    self.navigation.goTo(x=165, y=945, speed=70)
     
     input('>Confirm?')
 
-    self.navigation.orientTo(theta=radians(270), speed=75)
+    self.navigation.orientTo(theta=radians(270))
     
     input('>Confirm?')
 

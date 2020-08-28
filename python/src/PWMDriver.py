@@ -13,14 +13,21 @@ class PWMDriver:
     # self.pca.frequency = 50
     # self.slotTmp = {}
   
-  def setAngle(self, slot, angle):
+  def setAngle(self, slot, angle, config = 'default'):
     #self.driver.set_pwm(slot, 0, int(mappyt(angle, 0, 180, 75, 510))).
     # if str(slot) not in self.slotTmp:
     #   i = servo.Servo(self.pca.channels[slot])
     #   self.slotTmp.update({str(slot): i})
     #self.slotTmp[str(slot)].angle = angle
     #print(slot, angle)
-    self.driver.set_pwm(slot, 0, int(self.mappyt(angle, 0, 180, 70, 550)))
+    if config == 'default':
+      _min = 75
+      _max = 510
+    if config == 'lidar':
+      _min = 65
+      _max = 530
+
+    self.driver.set_pwm(slot, 0, int(self.mappyt(angle, 0, 180, _min, _max)))
 
   def setPwm(self, slot, off, on):
     self.driver.set_pwm(slot, off, on)

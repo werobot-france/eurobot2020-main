@@ -13,14 +13,25 @@ class Navigation:
     self.switches = container.get('switches')
     self.enabled = False
     self.isPaused = False
+
+  def saturation(self, minX, maxX, minY, maxY, value):
+    if value <= minX:
+      return minY
+    elif value >= maxX:
+      return maxY
+    else:
+      a = (maxY-minY)/(maxX - minX)
+      b = minY - a*minX
+      return a * value + b
   
   def goTo(self, **args):
     # x, y, theta = None, speed = 50, threshold = 5, stopOn = None
     targetX = args['x']
     targetY = args['y']
     orientation = None if 'theta' not in args else args['theta']
-    speed = 40 if 'speed' not in args else args['speed']
-    threshold = 5 if 'threshold' not in args else args['threshold']
+    speed = 50 if 'speed' not in args else args['speed']
+    speed/=2
+    threshold = 10 if 'threshold' not in args else args['threshold']
     stopOn = None if 'stopOn' not in args else args['stopOn']
     backward = False if 'backward' not in args else (args['backward'] == 'True' or args['backward'])
 
@@ -34,55 +45,45 @@ class Navigation:
       'threshold': threshold
     })
     
-    x, y, theta = self.positionWatcher.getPos()
-    
-    p, i, d = 3500, 0, 0
-    sommeErreurs = differenceErreurs = erreurPre = 0
-    distanceCibleI = sqrt((targetX-x)*(targetX-x)+(targetY-y)*(targetY-y))
+    p, i, d = 110, 0, 0
+    sommeErreurs = differenceErreurs = erreurPre = orientationError = 0
 
     while not self.done:
       x, y, theta = self.positionWatcher.getPos()
+      if theta > pi: theta -= 2*pi
       
-      distanceCible = sqrt((targetX-x)*(targetX-x)+(targetY-y)*(targetY-y))
+      targetDistance = sqrt((targetX-x)*(targetX-x)+(targetY-y)*(targetY-y))
       targetTheta = atan2((targetY - y), (targetX - x))
 
+      #if abs(orientationError)>pi/2: backward = not backward
+
       if (not backward):
-          erreurOrientation = (targetTheta - theta)
+        orientationError = (targetTheta - theta)
       else:
-          erreurOrientation = (targetTheta - (theta-pi))
+        orientationError = (targetTheta - (theta-pi))
 
-      cmdG = cmdD = speed/100*10000
+      #tmpSpeed = self.saturation(10, 150, 7, speed, targetDistance)
+      tmpSpeed = speed
 
-      if cmdD > 10000: cmdG = cmdD = 10000
-
-      while abs(erreurOrientation) > pi:
-          erreurOrientation += (-2*pi) * (erreurOrientation/abs(erreurOrientation))
-
-      cmd = (erreurOrientation*p) + (sommeErreurs*i) + (differenceErreurs*d)
-      cmdD += cmd
-      cmdG -= cmd
+      cmdG = cmdD = tmpSpeed
+      cmd = (orientationError*p) + (sommeErreurs*i) + (differenceErreurs*d)
+      if abs(cmd) > 255: cmd = 255 * self.sign(cmd)
+      cmd /= 255
+      cmdD += cmd * tmpSpeed
+      cmdG -= cmd * tmpSpeed
       
-      if abs(cmdD) > 10000: cmdD = 10000 * self.sign(cmdD) #if abs(cmdG)<vitesseR*10000 and cmdG != 0:cmdG = 10000*vitesseR * self.sign(cmdG)
-      if abs(cmdG) > 10000: cmdG = 10000 * self.sign(cmdG) #if abs(cmdD)<vitesseR*10000 and cmdD != 0:cmdD = 10000*vitesseR * self.sign(cmdD)
-      cmdD /= 100
-      cmdG /= 100
-      if abs(cmdD) < 1 : cmdD = 1 * self.sign(cmdD)
-      if abs(cmdG) < 1 : cmdG = 1 * self.sign(cmdG)
       
-      differenceErreurs = erreurOrientation - erreurPre
-      sommeErreurs += erreurOrientation
-      erreurPre = erreurOrientation
+      differenceErreurs = orientationError - erreurPre
+      sommeErreurs += orientationError
+      erreurPre = orientationError
 
-      if distanceCible < 100:
-        cmdG/=2+2*distanceCible/distanceCibleI
-        cmdD/=2+2*distanceCible/distanceCibleI
 
       if (not backward):
         self.platform.setSpeed([cmdG, cmdD])
       else:
         self.platform.setSpeed([-cmdD, -cmdG])
 
-      if distanceCible < threshold:
+      if targetDistance < threshold:
         self.done = True
       
       self.logger.debug({
@@ -90,9 +91,9 @@ class Navigation:
         'y': round(y, 0),
         'theta': round(degrees(targetTheta), 2),
         'targetTheta': round(degrees(targetTheta), 2),
-        'targetDist': round(distanceCible, 2),
+        'targetDist': round(targetDistance, 2),
         'cmd': [cmd, cmdG, cmdD],
-        'orientationError': round(degrees(erreurOrientation), 2),
+        'orientationError': round(degrees(orientationError), 2),
         'lastOrientationError': round(degrees(erreurPre), 2),
         'coef': [p, i, d]
       })
@@ -112,53 +113,47 @@ class Navigation:
   def orientTo(self, **args):
     targetTheta = args['theta']
     speed = 30 if 'speed' not in args else args['speed']
-    threshold = pi/50 if 'threshold' not in args else args['threshold']
-    
-    theta = self.positionWatcher.getPos()[2]
+    threshold = pi/100 if 'threshold' not in args else args['threshold']
+
+    self.done = False
+    theta = self.positionWatcher.getTheta()
     self.logger.info("OrientTo", {
       'currentTheta': degrees(theta),
       'targetTheta': degrees(targetTheta),
       'speed': speed
     })
 
-    if targetTheta > 3*pi/2 :
-      targetTheta -= 2*pi
+    p, i, d = 110, 2, 10
+    sommeErreurs = differenceErreurs = erreurPre = orientationError = 0
 
-    cmd = 0
-  
-    self.done = False
     while not self.done:
-      theta = self.positionWatcher.getPos()[2]
-      deltaTheta = targetTheta - theta
-      
-      if deltaTheta < -pi :
-        deltaTheta += 2*pi
-      
-      if deltaTheta >= 0:
-        coeffG = -1
-        coeffD = 1
-      else:
-        coeffG = 1
-        coeffD = -1
+      x, y, theta = self.positionWatcher.getPos()
+      if theta > pi: theta -= 2*pi
 
-      print(
-        [
-          abs(deltaTheta)/pi*100*coeffG,
-          abs(deltaTheta)/pi*100*coeffD
-        ],
-        degrees(theta),
-        [
-          cmd*coeffG,
-          cmd*coeffD
-        ],
-        deltaTheta
-      )
-      if abs(deltaTheta) > threshold:
-        cmd = (abs(deltaTheta)/pi)/1.5*speed
-        if cmd < 10 : cmd = 10
-        self.platform.setSpeed([cmd*coeffG, cmd*coeffD])
-      else:
+      errorsChoice = [
+        (targetTheta - theta),
+        (targetTheta + 2*pi - theta),
+        (targetTheta - 2*pi - theta)
+      ]
+      formattedChoices = list(map(lambda p: abs(p), errorsChoice))
+      orientationError = errorsChoice[formattedChoices.index(min(formattedChoices))]
+
+      cmdG = cmdD = 0
+      cmd = (orientationError*p) + (sommeErreurs*i) + (differenceErreurs*d)
+      if abs(cmd) > 255: cmd = 255 * self.sign(cmd)
+      cmd /= 255
+      cmdD += cmd * speed
+      cmdG -= cmd * speed
+      
+      differenceErreurs = orientationError - erreurPre
+      sommeErreurs += orientationError
+      erreurPre = orientationError
+
+      self.platform.setSpeed([cmdG, cmdD])
+
+      if abs(orientationError) < threshold:
         self.done = True
+
     self.platform.stop()
     self.logger.info("End of OrientTo", round(degrees(theta), 2))
 

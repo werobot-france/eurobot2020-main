@@ -12,7 +12,6 @@ from src.WebSocketServer import WebSocketServer
 from src.CommandsManager import CommandsManager
 from src.ArduinoManager import ArduinoManager
 from src.Scripts import Scripts
-from src.Detection import Detection
 #from src.Elevator import Elevator
 from src.Claw import Claw
 from time import sleep
@@ -63,9 +62,7 @@ if __name__ == '__main__':
   
   # elevator = Elevator(container)
   # container.set('elevator', elevator)
-  detection = Detection(container)
-  container.set('detection', detection)
-  
+
   lidar = Lidar(container)
   container.set('lidar', lidar)
   
@@ -85,8 +82,6 @@ if __name__ == '__main__':
     sleep(1)
     positionWatcher.reset()
     positionWatcher.start()
-    #lidar.start()
-    #detection.whenDetected(90, 30)
     
     root.info('App ready')
     # sleep(1)

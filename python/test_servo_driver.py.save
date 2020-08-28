@@ -1,0 +1,4 @@
+from src.PWMDriver import PWMDriver
+
+driver = PWMDriver()
+driver.setAngle(0	, 0)
