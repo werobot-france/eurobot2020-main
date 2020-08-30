@@ -1,12 +1,29 @@
 from math import *
+from src.WebSocketClient import WebSocketClient
+from src.Container import Container
 
+# The detection class is the main representative of the 'Detection' Process which is running in parallel of the main process
 class Detection:
-  
+
+  mustStop = False
+  mustStopTmp = False
+
   def __init__(self, container):
-    self.positionWatcher = container.get('positionWatcher')
-    self.navigation = container.get('navigation')
-    self.mustStop = False
-    self.mustStopTmp = False
+    self.logger = container.get('logger').get('Detection')
+
+  # facade to call getPos
+  def fetchPosition(self):
+    x = y = theta = 0
+    
+    return (x, y, theta)
+  
+  # facade to call navigation.pause throught ws
+  def pause(self):
+    pass
+
+  # facade to call navigation.resume throught ws
+  def resume(self):
+    pass
   
   # this function is called when ever something is detected by the lidar
   def whenDetected(self, angle, dist):
@@ -17,13 +34,16 @@ class Detection:
       self.mustStopTmp = False
       # BILAN
       if self.mustStop:
-        self.navigation.pause()
-        print('STOP! STOP!')
+        self.pause()
+        self.logger.debug('Stop')
       else:
         # TODO: add a timeout to prevent from too frequent stop/restart of the navigation
-        self.navigation.resume()
-        print('NOTHING')
+        self.resume()
+        self.logger.debug('Nothing')
       return
+    
+    # ask via websocket the current position (x, y, theta) of the robot
+    x, y, theta = self.fetchPosition()
     
     angle *= 2 # the angle of the servo has a delta of 180 degrees because of the gear ratio
     dist *= 10 # convert the distanced sensored in millimiters
@@ -53,13 +73,13 @@ class Detection:
       return
     
     # More advance computation to check if the target detected is in the table
-    absoluteAngle = (self.positionWatcher.getTheta() + angle) % (2*pi) # (absolue)
+    absoluteAngle = (theta + angle) % (2*pi) # (absolue)
     #print('absoluteAngle', absoluteAngle)
     margin = 300
-    ma = self.getDistanceMax(absoluteAngle)
+    ma = self.getDistanceMax(x, y, absoluteAngle)
     isInTable = horizontal < (ma - margin)
     if not isInTable:
-      print('Not in table')
+      self.logger.debug('Not in table')
       return
     print(horizontal, ma)
     
@@ -68,7 +88,7 @@ class Detection:
       self.mustStopTmp = True
       self.mustStop = True
       self.navigation.pause()
-      print(degrees(angle), degrees(absoluteAngle), 'OWOWOWOWOWOOWO CALM DOWN')
+      self.logger.debug(degrees(angle), degrees(absoluteAngle), 'CALM DOWN! HANDS!')
 
   # Walls :
   #               0
@@ -111,29 +131,27 @@ class Detection:
     return -1
 
   
-  def detectWall(self, angle):
-    # r = self.detectedWAll(angle)
-    # return r
-    return self.detectedWall(self.positionWatcher.getX(), self.positionWatcher.getY(), angle)
+  # def detectWall(self, angle):
+  #   # r = self.detectedWAll(angle)
+  #   # return r
+  #   return self.detectedWall(self.positionWatcher.getX(), self.positionWatcher.getY(), angle)
 
   # distance jusqu'à laquelle il peut y avoir un robot, qui correspond à la 
   # distance entre le Laser et le bord de la table selon la direction du détécteur
-  def getDistanceMax(self, angle):
+  def getDistanceMax(self, x, y, angle):
+    detectedWall = self.detectedWall(x, y, angle)
     wall0or2 = False
-    if (self.detectWall(angle) == 1 or self.detectWall(angle) == 3) :
-      coordoneeRobotAdequoite = self.positionWatcher.getX()
+    if detectedWall == 1 or detectedWall == 3:
+      coordoneeRobotAdequoite = x
     else:
       wall0or2 = True
-      coordoneeRobotAdequoite = self.positionWatcher.getY()
+      coordoneeRobotAdequoite = y
 
-    a = abs(self.Walls[self.detectWall(angle)] - coordoneeRobotAdequoite)
-    #print(a)
+    a = abs(self.Walls[detectedWall] - coordoneeRobotAdequoite)
     
     if wall0or2:
       o = tan(abs(angle-pi/2))*a
     else:
       o = tan(abs(pi-angle))*a
-    
-    #print(o)
 
     return sqrt(a**2 + o**2)

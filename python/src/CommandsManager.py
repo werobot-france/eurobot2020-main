@@ -13,13 +13,11 @@ class CommandsManager:
       {
         'name': 'ping',
         'description': 'Answer with pong!',
-        'arguments': [],
         'handler': self.ping
       },
       {
         'name': 'listCommands',
         'description': 'List all commands',
-        'arguments': [],
         'handler': self.listCommands
       },
       {
@@ -31,8 +29,13 @@ class CommandsManager:
       {
         'name': 'reset',
         'description': "Will reset the position watcher",
-        'arguments': [],
         'handler': self.reset
+      },
+      {
+        'name': 'pos',
+        'description': 'Get pos',
+        'arguments': [['basic', False]],
+        'handler': self.pos
       },
       {
         'name': 'setPos',
@@ -61,14 +64,7 @@ class CommandsManager:
       {
         'name': 'listScripts',
         'description': 'List files in the script directory',
-        'arguments': [],
         'handler': self.listScripts
-      },
-      {
-        'name': 'pos',
-        'description': 'Get pos',
-        'arguments': [],
-        'handler': self.pos
       },
       {
         'name': 'execScript',
@@ -97,7 +93,6 @@ class CommandsManager:
       {
         'name': 'stop',
         'description': 'Will stop the current running script',
-        'arguments': [],
         'handler': self.stop
       },
       {
@@ -105,10 +100,22 @@ class CommandsManager:
         'description': 'Will orient to the desired angle',
         'arguments': [['theta', True], ['speed', False]],
         'handler': self.orientTo
+      },
+      {
+        'name': 'pauseNavigation',
+        'description': 'Will pause the current navigation operation',
+        'handler': self.pauseNavigation
+      },
+      {
+        'name': 'resumeNavigation',
+        'description': 'Will resume the current navigation operation',
+        'handler': self.resumeNavigation
       }
     ]
     def filter(item):
       item.pop('handler', None)
+      if 'arguments' not in item:
+        item['arguments'] = []
       return item
     self.newCommands = list(map(filter, copy.deepcopy(self.commands)))
     
@@ -132,6 +139,8 @@ class CommandsManager:
     if len(commands) == 0:
       return 'Invalid Command!'
     command = commands[0]
+    if 'arguments' not in command:
+      command['arguments'] = []
     components = components[1:]
     arguments = {}
     if command['arguments'] != -1:
@@ -249,8 +258,7 @@ class CommandsManager:
     self.navigation.stop()
     self.platform.stop()
     self.rightClaw.stop()
-    
-    
+
   def parseAngleArgs(self, args):
     if 'thetaDeg' in args:
       args['theta'] = radians(args['thetaDeg'])
@@ -280,7 +288,8 @@ class CommandsManager:
   
   def pos(self, args):
     data = list(self.positionWatcher.getPos())
-    data[2] = [data[2], degrees(data[2])]
+    if 'basic' not in args:
+      data[2] = [data[2], degrees(data[2])]
     return data
   
   def setPos(self, args):
@@ -297,3 +306,11 @@ class CommandsManager:
   
   def listCommands(self, components):
     return self.newCommands
+
+  def pauseNavigation(self, _):
+    self.navigation.pause()
+    return 'OK'
+
+  def resumeNavigation(self, _):
+    self.navigation.resume()
+    return 'OK'

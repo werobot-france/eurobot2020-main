@@ -182,6 +182,8 @@ class Navigation:
 
   def pause(self, state = True):
     self.isPaused = state
-    
+    self.logger.info('Navigation paused')
+
   def resume(self):
     self.isPaused = False
+    self.logger.info('Navigation resumed')

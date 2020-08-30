@@ -12,18 +12,19 @@ from src.WebSocketServer import WebSocketServer
 from src.CommandsManager import CommandsManager
 from src.ArduinoManager import ArduinoManager
 from src.Scripts import Scripts
-from src.Detection import Detection
+from src.DetectionProcess import DetectionProcess
 #from src.Elevator import Elevator
 from src.Claw import Claw
 from time import sleep
 from src.Logger import LoggerManager
 
+container = Container()
+
+logger = LoggerManager()
+logger.setLevel('debug')
+container.set('logger', logger)
+
 if __name__ == '__main__':
-  container = Container()
-  
-  logger = LoggerManager()
-  logger.setLevel('debug')
-  container.set('logger', logger)
   root = logger.get('Root')
 
   ws = WebSocketServer(container)
@@ -45,6 +46,10 @@ if __name__ == '__main__':
   positionWatcher = PositionWatcher(container)
   #positionWatcher.start()
   container.set('positionWatcher', positionWatcher)
+  
+  detectionProcess = DetectionProcess(container)
+  container.set('detectionProcess', detectionProcess)
+  detectionProcess.start()
 
   # switches = Switches(container)
   # container.set('switches', switches)
@@ -63,12 +68,6 @@ if __name__ == '__main__':
   
   # elevator = Elevator(container)
   # container.set('elevator', elevator)
-  detection = Detection(container)
-  container.set('detection', detection)
-  
-  lidar = Lidar(container)
-  container.set('lidar', lidar)
-  
   commandsManager.init()
 
   def onPos(x, y, t):
