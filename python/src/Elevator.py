@@ -20,7 +20,7 @@ class Elevator:
     if selector == None:
       selector = ['left', 'mid', 'right']
     if 'left' in selector:
-      self.left.angle = (180 - angle)
+      self.left.angle = angle - 5
     if 'mid' in selector:
       self.mid.angle = angle - 5
     if 'right' in selector:

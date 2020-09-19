@@ -19,11 +19,11 @@ class Flag:
       self.logger.warn('mocked!')
 
   def open(self, values):
-    self.driver.setAngle(self.servoSlot, 90)
+    self.driver.setAngle(self.servoSlot, 0, 'flag')
     self.logger.info('opened!')
 
   def close(self, values):
-    self.driver.setAngle(self.servoSlot, 180)
+    self.driver.setAngle(self.servoSlot, 90, 'flag')
     self.logger.info('closed!')
 
   def start(self):

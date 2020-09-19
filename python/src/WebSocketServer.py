@@ -51,7 +51,7 @@ class WebSocketServer:
     # print('clients', len(self.clients))
 
   def onMessage(self, client, server, message):
-    self.logger.debug('New message', message)
+    #self.logger.debug('New message', message)
     addr = self.getAddr(client)
     # We parse the json of the message
     messageParsed = json.loads(message)
@@ -78,7 +78,8 @@ class WebSocketServer:
       # interpret a command
       res = self.commandsManager.exec(args['payload'])
       #print(res)
-      self.send(client, 'execCommandResponse', res)
+      if res != None:
+        self.send(client, 'execCommandResponse', res)
     
     elif command == 'sub':
       c = getClient()

@@ -10,21 +10,25 @@ class Detection:
 
   def __init__(self, container):
     self.logger = container.get('logger').get('Detection')
+    self.client = container.get('client')
 
   # facade to call getPos
   def fetchPosition(self):
     x = y = theta = 0
-    
+    res = self.client.send('execCommand', {'payload': 'pos'}, True)
+    x = res[0]
+    y = res[1]
+    theta = res[2][0]
     return (x, y, theta)
   
   # facade to call navigation.pause throught ws
   def pause(self):
-    pass
+    self.client.send('execCommand', {'payload': 'pauseNavigation'})
 
   # facade to call navigation.resume throught ws
-  def resume(self):
-    pass
-  
+  def resume(self):  
+    self.client.send('execCommand', {'payload': 'resumeNavigation'})
+
   # this function is called when ever something is detected by the lidar
   def whenDetected(self, angle, dist):
     # when the angle passed is set to None, we consider this scanning plane as the reference (zero)
@@ -75,9 +79,9 @@ class Detection:
     # More advance computation to check if the target detected is in the table
     absoluteAngle = (theta + angle) % (2*pi) # (absolue)
     #print('absoluteAngle', absoluteAngle)
-    margin = 300
+    margin = 100
     ma = self.getDistanceMax(x, y, absoluteAngle)
-    isInTable = horizontal < (ma - margin)
+    isInTable = (horizontal - margin) < ma
     if not isInTable:
       self.logger.debug('Not in table')
       return
@@ -87,7 +91,7 @@ class Detection:
     if newStop:
       self.mustStopTmp = True
       self.mustStop = True
-      self.navigation.pause()
+      self.pause()
       self.logger.debug(degrees(angle), degrees(absoluteAngle), 'CALM DOWN! HANDS!')
 
   # Walls :

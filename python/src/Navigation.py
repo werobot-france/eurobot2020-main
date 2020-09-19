@@ -6,6 +6,7 @@ from time import sleep
 This class manage all the movement of the robot motorized platform
 '''
 class Navigation:
+
   def __init__(self, container):
     self.logger = container.get('logger').get('Navigation')
     self.platform = container.get('platform')
@@ -30,10 +31,10 @@ class Navigation:
     targetY = args['y']
     orientation = None if 'theta' not in args else args['theta']
     speed = 50 if 'speed' not in args else args['speed']
-    speed/=2
+    speed /= 2
     threshold = 10 if 'threshold' not in args else args['threshold']
     stopOn = None if 'stopOn' not in args else args['stopOn']
-    backward = False if 'backward' not in args else (args['backward'] == 'True' or args['backward'])
+    backward = False if 'backward' not in args else args['backward']
 
     self.done = False
     self.logger.info("GoTo", {
@@ -42,10 +43,11 @@ class Navigation:
       'theta': degrees(orientation) if orientation != None else None,
       'stopOn': stopOn,
       'speed': speed,
-      'threshold': threshold
+      'threshold': threshold,
+      'backward': backward
     })
-    
-    p, i, d = 110, 0, 0
+
+    p, i, d = 150, 0, 0
     sommeErreurs = differenceErreurs = erreurPre = orientationError = 0
 
     while not self.done:
@@ -57,13 +59,14 @@ class Navigation:
 
       #if abs(orientationError)>pi/2: backward = not backward
 
-      if (not backward):
+      if not backward:
         orientationError = (targetTheta - theta)
       else:
         orientationError = (targetTheta - (theta-pi))
+        if orientationError > pi: orientationError -= 2*pi
 
-      #tmpSpeed = self.saturation(10, 150, 7, speed, targetDistance)
-      tmpSpeed = speed
+      tmpSpeed = self.saturation(10, 150, 15, speed, targetDistance)
+      #tmpSpeed = speed
 
       cmdG = cmdD = tmpSpeed
       cmd = (orientationError*p) + (sommeErreurs*i) + (differenceErreurs*d)
@@ -71,14 +74,12 @@ class Navigation:
       cmd /= 255
       cmdD += cmd * tmpSpeed
       cmdG -= cmd * tmpSpeed
-      
-      
+
       differenceErreurs = orientationError - erreurPre
       sommeErreurs += orientationError
       erreurPre = orientationError
 
-
-      if (not backward):
+      if not backward:
         self.platform.setSpeed([cmdG, cmdD])
       else:
         self.platform.setSpeed([-cmdD, -cmdG])
@@ -89,7 +90,7 @@ class Navigation:
       self.logger.debug({
         'x': round(x, 0),
         'y': round(y, 0),
-        'theta': round(degrees(targetTheta), 2),
+        'theta': round(degrees(theta), 2),
         'targetTheta': round(degrees(targetTheta), 2),
         'targetDist': round(targetDistance, 2),
         'cmd': [cmd, cmdG, cmdD],
@@ -97,10 +98,16 @@ class Navigation:
         'lastOrientationError': round(degrees(erreurPre), 2),
         'coef': [p, i, d]
       })
-      
+
       # stop quand ya un robot
       while self.isPaused:
-        sleep(0.4)
+        self.platform.stop()
+        sleep(1)
+
+      if (not backward):
+        self.platform.setSpeed([cmdG, cmdD])
+      else:
+        self.platform.setSpeed([-cmdD, -cmdG])
 
     self.platform.stop()
     self.logger.info("End of GoTo")

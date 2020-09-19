@@ -91,6 +91,12 @@ class CommandsManager:
         'handler': self.clawPos
       },
       {
+        'name': 'clawsAngles',
+        'description': 'Set pos of the claw',
+        'arguments': [['l', True], ['m', True], ['r', True]],
+        'handler': self.clawsAngles
+      },
+      {
         'name': 'stop',
         'description': 'Will stop the current running script',
         'handler': self.stop
@@ -251,6 +257,10 @@ class CommandsManager:
     else: 
       self.rightClaw.setClawsAngle(int(components['angle']), selector)
     return 'OK'
+  
+  def clawsAngles(self, components):
+    self.rightClaw.setAll([components['l'], components['m'], components['r']])
+    return 'OK'
 
   def stop(self, _):
     # will stop every thread in the world
@@ -258,6 +268,7 @@ class CommandsManager:
     self.navigation.stop()
     self.platform.stop()
     self.rightClaw.stop()
+    return 'OK'
 
   def parseAngleArgs(self, args):
     if 'thetaDeg' in args:
@@ -268,6 +279,8 @@ class CommandsManager:
     return args
   
   def goTo(self, args):
+    if 'backward' in args:
+      args['backward'] = bool(args['backward'])
     args = self.parseAngleArgs(args)
     self.navigation.goTo(**args)
     return 'Done'
@@ -309,8 +322,8 @@ class CommandsManager:
 
   def pauseNavigation(self, _):
     self.navigation.pause()
-    return 'OK'
+    return None
 
   def resumeNavigation(self, _):
     self.navigation.resume()
-    return 'OK'
+    return None

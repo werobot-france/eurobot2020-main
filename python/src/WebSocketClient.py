@@ -11,7 +11,7 @@ class WebSocketClient:
 
   def __init__(self, uri, identifier = ''):
     self.message = ''
-    if uri.find('identifier=') == -1 or identifier == '':
+    if uri.find('identifier=') == -1 and identifier == '':
       identifier = 'terminal_' + str(random.randint(1000, 9999)) + '_' + str(round(time.time(), 3))
     self.uri = uri + '?identifier=' +  identifier
     self.ws = None
@@ -32,7 +32,7 @@ class WebSocketClient:
         self.lastData = self.recv()
       except WebSocketConnectionClosedException:
         e = False
-      if (self.onTimeCallback != None):
+      if self.onTimeCallback != None:
         self.onTimeCallback(self.lastData)
         self.onTimeCallback = None
     sleep(1)

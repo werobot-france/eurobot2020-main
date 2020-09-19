@@ -62,13 +62,7 @@ if __name__ == '__main__':
   navigation = Navigation(container)
   container.set('navigation', navigation)
   
-  rightClaw = Claw(container, {
-    'elevator': 7,
-    'claws': [6, 5, 4],
-    'top': 10,
-    'bottom': 115,
-    'middle': 50
-  })
+  rightClaw = Claw(container, {'elevator': 7, 'claws': [6, 5, 4]})
   container.set('rightClaw', rightClaw)
   
   # elevator = Elevator(container)
@@ -85,7 +79,6 @@ if __name__ == '__main__':
     ws.start()
     #lidar.start()
     platform.stop()
-    sleep(0.4)
     positionWatcher.reset()
     positionWatcher.start()
     #lidar.start()
@@ -94,12 +87,7 @@ if __name__ == '__main__':
     #detectionProcess.start()
     
     root.info('App ready')
-    # sleep(1)
-    # navigation.goTo({'x':600, 'y':600, 'orientation':pi })
-    # input('You confirm?')
-    # navigation.goTo({ 'x': 979, 'y': 1500, 'orientation': pi, 'speed': 40 })
-    while True:
-      sleep(100)
+    navigation.goTo(x=500, y=500, theta=pi)
 
   try:
     app()
