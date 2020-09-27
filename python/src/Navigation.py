@@ -54,16 +54,25 @@ class Navigation:
       x, y, theta = self.positionWatcher.getPos()
       if theta > pi: theta -= 2*pi
       
+      # if backward:
+      #   theta -= pi
+      
       targetDistance = sqrt((targetX-x)*(targetX-x)+(targetY-y)*(targetY-y))
       targetTheta = atan2((targetY - y), (targetX - x))
 
       #if abs(orientationError)>pi/2: backward = not backward
 
-      if not backward:
-        orientationError = (targetTheta - theta)
-      else:
+      # if not backward:
+      #   orientationError = (targetTheta - theta)
+      # else:
+      #   orientationError = (targetTheta - (theta-pi))
+      #   if orientationError > pi: orientationError -= 2*pi
+      if backward:
         orientationError = (targetTheta - (theta-pi))
         if orientationError > pi: orientationError -= 2*pi
+        elif orientationError <= -pi: orientationError += 2*pi
+      else:
+        orientationError = (targetTheta - theta)
 
       tmpSpeed = self.saturation(10, 150, 15, speed, targetDistance)
       #tmpSpeed = speed
@@ -78,11 +87,12 @@ class Navigation:
       differenceErreurs = orientationError - erreurPre
       sommeErreurs += orientationError
       erreurPre = orientationError
-
-      if not backward:
-        self.platform.setSpeed([cmdG, cmdD])
-      else:
+      
+      #self.platform.setSpeed([cmdG, cmdD])
+      if backward:
         self.platform.setSpeed([-cmdD, -cmdG])
+      else:
+        self.platform.setSpeed([cmdG, cmdD])
 
       if targetDistance < threshold:
         self.done = True
@@ -103,11 +113,11 @@ class Navigation:
       while self.isPaused:
         self.platform.stop()
         sleep(1)
-
-      if (not backward):
-        self.platform.setSpeed([cmdG, cmdD])
-      else:
+      
+      if backward:
         self.platform.setSpeed([-cmdD, -cmdG])
+      else:
+        self.platform.setSpeed([cmdG, cmdD])
 
     self.platform.stop()
     self.logger.info("End of GoTo")

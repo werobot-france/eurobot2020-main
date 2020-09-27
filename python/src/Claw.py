@@ -109,9 +109,9 @@ class Claw:
   def open(self, selector = None):
     print('OPEN')
     self.setAll([
-      80,
-      120,
-      120
+      60,
+      140,
+      140
     ])
 
   def close(self, selector = None):
