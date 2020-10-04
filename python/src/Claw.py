@@ -21,7 +21,6 @@ class Claw:
     self.elevatorAngle = 0
     self.clawsAngle = [0, 0, 0]
     self.slotTmp = {}
-    self.servoProfile = 'rev'
     
     self.clawsSlot = config['claws']
     self.elevatorSlot = config['elevator']
@@ -29,8 +28,11 @@ class Claw:
     self.bottomPos = config['bottom']
     self.middlePos = config['middle']
     self.topPos = config['top']
+
+    self.servoProfile = config['servoProfile']
   
   def setAngle(self, slot, angle):
+    print(self.servoProfile)
     self.driver.setAngle(slot, angle, self.servoProfile)
   
   def fetchStatus(self):
@@ -113,6 +115,9 @@ class Claw:
       140,
       140
     ])
+    # 100
+    # 113
+    # 10
 
   def close(self, selector = None):
     print('CLOSE')
@@ -121,6 +126,9 @@ class Claw:
       65,
       40
     ])
+    # 
+    # 50
+    # 30
   
   def sleep(self, selector = None):
     self.setClawsAngle(50, selector)

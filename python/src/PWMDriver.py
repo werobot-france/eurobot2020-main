@@ -7,6 +7,7 @@ class PWMDriver:
     self.servoProfiles = {
       'default': {'range': 180, 'min': 65, 'max': 530},
       'lidar': {'range': 180, 'min': 75, 'max': 510},
+      'china': {'range': 180, 'min': 75, 'max': 510},
       'flag': {'range': 180, 'min': 100, 'max': 480},
       'rev': {'range': 270, 'min': 95, 'max': 552},
     }
@@ -24,6 +25,7 @@ class PWMDriver:
     if angle < 0 or angle > profile['range']:
       print('PWMDriver: Invalid range passed ' + angle + ' but range is ' + profile['range'])
     
+    print('setting slot', slot, 'to angle', angle, 'with profile', profileName, profile)
     pulse = int(self.mappyt(angle, 0, profile['range'], profile['min'], profile['max']))
     self.driver.set_pwm(slot, 0, pulse)
 

@@ -62,13 +62,23 @@ if __name__ == '__main__':
   navigation = Navigation(container)
   container.set('navigation', navigation)
   
+  leftClaw = Claw(container, {
+    'elevator': 11,
+    'claws': [8, 9, 10],
+    'top': 10,
+    'bottom': 115,
+    'middle': 50,
+    'servoProfile': 'china'
+  })
   rightClaw = Claw(container, {
     'elevator': 7,
     'claws': [6, 5, 4],
     'top': 10,
     'bottom': 115,
-    'middle': 50
+    'middle': 50,
+    'servoProfile': 'rev'
   })
+  container.set('leftClaw', leftClaw)
   container.set('rightClaw', rightClaw)
   
   # elevator = Elevator(container)

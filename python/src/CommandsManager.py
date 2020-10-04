@@ -81,19 +81,19 @@ class CommandsManager:
       {
         'name': 'claws',
         'description': 'Set angle of claws servo',
-        'arguments': [['angle', True], ['select', False]],
+        'arguments': [['side', True], ['angle', True], ['select', False]],
         'handler': self.claws
       },
       {
         'name': 'clawPos',
         'description': 'Set pos of the claw',
-        'arguments': [['pos', True]],
+        'arguments': [['side', True], ['pos', True]],
         'handler': self.clawPos
       },
       {
         'name': 'clawsAngles',
         'description': 'Set pos of the claw',
-        'arguments': [['l', True], ['m', True], ['r', True]],
+        'arguments': [['side', True], ['l', True], ['m', True], ['r', True]],
         'handler': self.clawsAngles
       },
       {
@@ -127,7 +127,12 @@ class CommandsManager:
     
   def init(self):
     self.positionWatcher = self.container.get('positionWatcher')
+    self.leftClaw = self.container.get('leftClaw')
     self.rightClaw = self.container.get('rightClaw')
+    self.clawsInstances = {
+      'left': self.leftClaw,
+      'right': self.rightClaw
+    }
     self.navigation = self.container.get('navigation')
     self.platform = self.container.get('platform')
     self.elevator = self.container.get('elevator')
@@ -241,25 +246,44 @@ class CommandsManager:
       self.elevator.goTo(components['steps'], components['speed'])
     return 'OK'
   
+  def parseClawSide(self, components):
+    if 'side' not in components:
+      return None
+    a = components['side']
+    print(a)
+    if a not in ['left', 'right']:
+      return None
+    return self.clawsInstances[components['side']]
+  
   def clawPos(self, components):
+    instance = self.parseClawSide(components)
+    if instance == None:
+      return 'ERR'
     components['pos'] = int(components['pos'])
-    self.rightClaw.directGoTo(components['pos'])
+    instance.directGoTo(components['pos'])
     return 'OK'
 
   def claws(self, components):
+    instance = self.parseClawSide(components)
+    if instance == None:
+      return 'ERR'
     selector = None
     if 'select' in components:
       selector = eval(components['select'])
     if components['angle'] == 'open':
-      self.rightClaw.open(selector)
+      instance.open(selector)
     elif components['angle'] == 'close':
-      self.rightClaw.close(selector)
+      instance.close(selector)
     else: 
-      self.rightClaw.setClawsAngle(int(components['angle']), selector)
+      instance.setClawsAngle(int(components['angle']), selector)
     return 'OK'
   
   def clawsAngles(self, components):
-    self.rightClaw.setAll([components['l'], components['m'], components['r']])
+    instance = self.parseClawSide(components)
+    if instance == None:
+      return 'ERR'
+    self.parseClawSide(components)
+    instance.setAll([components['l'], components['m'], components['r']])
     return 'OK'
 
   def stop(self, _):
