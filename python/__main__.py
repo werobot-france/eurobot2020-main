@@ -63,32 +63,36 @@ if __name__ == '__main__':
   container.set('navigation', navigation)
   
   leftClaw = Claw(container, {
+    'id': 'left',
     'clawsProfile': 'china',
     'elevatorProfile': 'lidar',
-    'elevatorSlot': 11,
-    'clawsSlot': [10, 8, 9],
+    'elevatorSlot': 12,
+    'clawsSlot': [15, 13, 14], # front, mid, back
     'elevatorPos': {
-      'top': 19,
-      'middle': 170,
+      'top': 32,
+      'middle': 165,
       'bottom': 180
     },
     'clawsPos': {
       'open': [80, 134, 112], # 85, 120, 100
-      'close': [170, 52, 30]
+      'sleep': [90, 90, 90],
+      'close': [163, 46, 28] # [170, 52, 30]
     }
   })
   rightClaw = Claw(container, {
+    'id': 'right',
     'clawsProfile': 'rev',
     'elevatorProfile': 'rev',
-    'elevatorSlot': 7,
-    'clawsSlot': [6, 5, 4],
+    'elevatorSlot': 11,
+    'clawsSlot': [10, 9, 8],
     'elevatorPos': {
       'top': 0,
-      'middle': 148,
-      'bottom': 155
+      'middle': 130,
+      'bottom': 165
     },
     'clawsPos': {
       'open': [66, 159, 145],
+      'sleep': [90, 90, 90],
       'close': [165, 62, 62]
     }
   })

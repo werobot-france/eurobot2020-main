@@ -279,6 +279,8 @@ class CommandsManager:
       selector = eval(components['select'])
     if components['angle'] == 'open':
       instance.open(selector)
+    elif components['angle'] == 'sleep':
+      instance.sleep(selector)
     elif components['angle'] == 'close':
       instance.close(selector)
     else: 

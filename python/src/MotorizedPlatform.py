@@ -21,7 +21,7 @@ class MotorizedPlatform:
   #   #   'Left': 14,
   #   #   'Right': 15,
   # }
-  escSlots = [14, 15]
+  escSlots = [2, 3]
   
   # added for the new version, just to invert the motor command
   inverted = True

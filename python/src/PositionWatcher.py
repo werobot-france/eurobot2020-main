@@ -53,12 +53,12 @@ class PositionWatcher:
   #-OLDHOLONOMIC%END
   
   # left (scotch rouge) encodeur
-  phaseA = DigitalInputDevice(16, True)
-  phaseB = DigitalInputDevice(6, True)
+  phaseA = DigitalInputDevice(27, True)
+  phaseB = DigitalInputDevice(17, True)
   
   # right (sans scotch) encodeur
-  phaseC = DigitalInputDevice(19, True)
-  phaseD = DigitalInputDevice(5, True)
+  phaseC = DigitalInputDevice(5, True)
+  phaseD = DigitalInputDevice(16, True)
 
   
   watchPositionThread = None
