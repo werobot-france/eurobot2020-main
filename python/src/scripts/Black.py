@@ -5,19 +5,17 @@ from time import sleep
 class Black(API):
   
   def run(self):
-    self.rightClaw.directGoTo(80)
-    input('>Confirm?')
-    self.rightClaw.open()
     self.rightClaw.goTop()
+    self.rightClaw.open()
     input('>Confirm?')
     
-    self.navigation.goTo(x=180, y=1000)
+    self.navigation.goTo(x=150, y=925)
     sleep(0.6)
     self.navigation.orientTo(theta=radians(270))
     
     input('>Confirm?')
 
-    self.rightClaw.directGoTo(155)
+    self.rightClaw.goMiddle()
     input('>Confirm?')
     self.rightClaw.close()
     sleep(1)
@@ -32,8 +30,8 @@ class Black(API):
     self.navigation.orientTo(theta=radians(90))
     
     input('>Confirm?')
-    self.rightClaw.directGoTo(180)
-    sleep(0.5)
+    self.rightClaw.goBottom()
+    sleep(0.7)
     self.rightClaw.open()
     sleep(1)
     self.rightClaw.goTop()

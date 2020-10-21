@@ -8,11 +8,17 @@ from time import sleep
 class Claw:
 
   def __init__(self, container, config = {
-    'top': 10,
-    'bottom': 115,
-    'middle': 50,
-    'elevator': 7,
-    'claws': [6, 5, 4]
+    'elevatorPos': {
+      'top': 50,
+      'middle': 100,
+      'bottom': 150
+    },
+    'clawsPos': {
+      'open': [90, 90, 90],
+      'close': [90, 90, 90]
+    },
+    'elevatorSlot': 7,
+    'clawsSlot': [6, 5, 4]
   }):
     self.base = '/home/pi/eurobot2020-main/python/tmp'
     self.driver = container.get('driver')
@@ -22,18 +28,21 @@ class Claw:
     self.clawsAngle = [0, 0, 0]
     self.slotTmp = {}
     
-    self.clawsSlot = config['claws']
-    self.elevatorSlot = config['elevator']
+    self.clawsSlot = config['clawsSlot']
+    self.elevatorSlot = config['elevatorSlot']
     
-    self.bottomPos = config['bottom']
-    self.middlePos = config['middle']
-    self.topPos = config['top']
+    self.clawsPos = config['clawsPos']
+    self.elevatorPos = config['elevatorPos']
 
-    self.servoProfile = config['servoProfile']
+    self.clawsProfile = config['clawsProfile']
+    self.elevatorProfile = config['elevatorProfile']
   
   def setAngle(self, slot, angle):
-    print(self.servoProfile)
-    self.driver.setAngle(slot, angle, self.servoProfile)
+    if slot == self.elevatorSlot:
+      profile = self.elevatorProfile
+    else:
+      profile = self.clawsProfile
+    self.driver.setAngle(slot, angle, profile)
   
   def fetchStatus(self):
     status = open(self.base + '/claw-status.json')
@@ -51,13 +60,13 @@ class Claw:
     status.close()
     
   def goMiddle(self):
-    self.directGoTo(self.middlePos)
+    self.directGoTo(self.elevatorPos['middle'])
     
   def goTop(self):
-    self.directGoTo(self.topPos)
+    self.directGoTo(self.elevatorPos['top'])
 
   def goBottom(self):
-    self.directGoTo(self.bottomPos)
+    self.directGoTo(self.elevatorPos['bottom'])
     
   def directGoTo(self, target):
     self.elevatorAngle = target
@@ -111,24 +120,18 @@ class Claw:
   def open(self, selector = None):
     print('OPEN')
     self.setAll([
-      60,
-      140,
-      140
+      self.clawsPos['open'][0],
+      self.clawsPos['open'][1],
+      self.clawsPos['open'][2]
     ])
-    # 100
-    # 113
-    # 10
 
   def close(self, selector = None):
     print('CLOSE')
     self.setAll([
-      150,
-      65,
-      40
+      self.clawsPos['close'][0],
+      self.clawsPos['close'][1],
+      self.clawsPos['close'][2]
     ])
-    # 
-    # 50
-    # 30
   
   def sleep(self, selector = None):
     self.setClawsAngle(50, selector)

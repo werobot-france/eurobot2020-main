@@ -4,3 +4,4 @@ class API:
     self.positionWatcher = container.get('positionWatcher')
     self.elevator = container.get('elevator')
     self.rightClaw = container.get('rightClaw')
+    self.leftClaw = container.get('leftClaw')

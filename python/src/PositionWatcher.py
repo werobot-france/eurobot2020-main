@@ -13,7 +13,7 @@ class PositionWatcher:
   # lateralPerimeter = 60*pi
   #-OLDHOLONOMIC%END
   
-  perimeter = 205
+  perimeter = 210#205
   
   #-OLDHOLONOMIC%START
   # distance entre les deux encodeurs latéraux (milieux) (arrête de la base)
@@ -23,7 +23,7 @@ class PositionWatcher:
   # backAxialDistance = 110
   #-OLDHOLONOMIC%END
   
-  axialDistance = 233.5
+  axialDistance = 236.5#233.5
   
   #-OLDHOLONOMIC%START
   # coté bleu x: 979, y: 159
@@ -34,9 +34,9 @@ class PositionWatcher:
   # defaultTheta = pi
   #-OLDHOLONOMIC%END
   
-  defaultX = 900
-  defaultY = 200
-  defaultTheta = pi/2
+  defaultX = 623.5 #900
+  defaultY = 203 #200
+  defaultTheta = pi
 
   #-OLDHOLONOMIC%START
   # left (scotch bleu) encodeur branché sur la prise du milieur

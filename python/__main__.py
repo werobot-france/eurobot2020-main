@@ -63,20 +63,34 @@ if __name__ == '__main__':
   container.set('navigation', navigation)
   
   leftClaw = Claw(container, {
-    'elevator': 11,
-    'claws': [8, 9, 10],
-    'top': 10,
-    'bottom': 115,
-    'middle': 50,
-    'servoProfile': 'china'
+    'clawsProfile': 'china',
+    'elevatorProfile': 'lidar',
+    'elevatorSlot': 11,
+    'clawsSlot': [10, 8, 9],
+    'elevatorPos': {
+      'top': 19,
+      'middle': 170,
+      'bottom': 180
+    },
+    'clawsPos': {
+      'open': [80, 134, 112], # 85, 120, 100
+      'close': [170, 52, 30]
+    }
   })
   rightClaw = Claw(container, {
-    'elevator': 7,
-    'claws': [6, 5, 4],
-    'top': 10,
-    'bottom': 115,
-    'middle': 50,
-    'servoProfile': 'rev'
+    'clawsProfile': 'rev',
+    'elevatorProfile': 'rev',
+    'elevatorSlot': 7,
+    'clawsSlot': [6, 5, 4],
+    'elevatorPos': {
+      'top': 0,
+      'middle': 148,
+      'bottom': 155
+    },
+    'clawsPos': {
+      'open': [66, 159, 145],
+      'close': [165, 62, 62]
+    }
   })
   container.set('leftClaw', leftClaw)
   container.set('rightClaw', rightClaw)

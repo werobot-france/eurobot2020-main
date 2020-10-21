@@ -22,6 +22,7 @@ class Scripts:
     self.logger.info('Starting', name, 'script')
     self.scriptThread = Thread(target=script.run)
     self.scriptThread.start()
+    return None
 
   def list(self):
     return os.listdir('src/scripts')

@@ -72,7 +72,8 @@ class Navigation:
         if orientationError > pi: orientationError -= 2*pi
         elif orientationError <= -pi: orientationError += 2*pi
       else:
-        orientationError = (targetTheta - theta)
+        orientationError = (targetTheta - theta)%(2*pi)
+        if orientationError > pi: orientationError -= 2*pi
 
       tmpSpeed = self.saturation(10, 150, 15, speed, targetDistance)
       #tmpSpeed = speed
@@ -131,18 +132,22 @@ class Navigation:
     targetTheta = args['theta']
     speed = 30 if 'speed' not in args else args['speed']
     threshold = pi/100 if 'threshold' not in args else args['threshold']
+    clockwise = None if 'clockwise' not in args else args['clockwise']
 
     self.done = False
     theta = self.positionWatcher.getTheta()
     self.logger.info("OrientTo", {
+      'threshold': degrees(threshold),
       'currentTheta': degrees(theta),
       'targetTheta': degrees(targetTheta),
-      'speed': speed
+      'speed': speed,
+      'clockwise': clockwise
     })
 
-    p, i, d = 110, 2, 10
+    p, i, d = 120, 0, 0
     sommeErreurs = differenceErreurs = erreurPre = orientationError = 0
 
+    stopCount = 0
     while not self.done:
       x, y, theta = self.positionWatcher.getPos()
       if theta > pi: theta -= 2*pi
@@ -153,12 +158,21 @@ class Navigation:
         (targetTheta - 2*pi - theta)
       ]
       formattedChoices = list(map(lambda p: abs(p), errorsChoice))
-      orientationError = errorsChoice[formattedChoices.index(min(formattedChoices))]
+      minO = min(formattedChoices)
+      
+      if clockwise == None:
+        orientationError = errorsChoice[formattedChoices.index(minO)]
+      elif clockwise:
+        orientationError = -1*minO
+      else:
+        orientationError = minO
 
       cmdG = cmdD = 0
       cmd = (orientationError*p) + (sommeErreurs*i) + (differenceErreurs*d)
+      if abs(cmd*speed/255) < 12: cmd = 12*255/speed * self.sign(cmd)
       if abs(cmd) > 255: cmd = 255 * self.sign(cmd)
       cmd /= 255
+      
       cmdD += cmd * speed
       cmdG -= cmd * speed
       
@@ -168,8 +182,20 @@ class Navigation:
 
       self.platform.setSpeed([cmdG, cmdD])
 
+      self.logger.debug({
+        'theta': round(degrees(theta), 3),
+        'targetTheta': round(degrees(targetTheta), 3),
+        'cmd': [cmd, cmdG, cmdD],
+        'orientationError': round(degrees(orientationError), 3),
+        'lastOrientationError': round(degrees(erreurPre), 2),
+        'coef': [p, i, d]
+      })
+      
       if abs(orientationError) < threshold:
-        self.done = True
+        clockwise = None
+        stopCount += 1
+        if stopCount > 4:
+          self.done = True
 
     self.platform.stop()
     self.logger.info("End of OrientTo", round(degrees(theta), 2))

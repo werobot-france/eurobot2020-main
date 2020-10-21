@@ -24,9 +24,11 @@ class PWMDriver:
       profile['range'] = 180
     if angle < 0 or angle > profile['range']:
       print('PWMDriver: Invalid range passed ' + angle + ' but range is ' + profile['range'])
-    
-    print('setting slot', slot, 'to angle', angle, 'with profile', profileName, profile)
+    if slot > 15 or slot < 0:
+      print('> ERR!!! Invalid slot passed to setAngle!')
+      return
     pulse = int(self.mappyt(angle, 0, profile['range'], profile['min'], profile['max']))
+    print('setting slot', slot, 'to angle', angle, 'with profile', profileName, profile, pulse)
     self.driver.set_pwm(slot, 0, pulse)
 
   def setPwm(self, slot, off, on):

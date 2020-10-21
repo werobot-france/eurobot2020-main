@@ -104,7 +104,7 @@ class CommandsManager:
       {
         'name': 'orientTo',
         'description': 'Will orient to the desired angle',
-        'arguments': [['theta', True], ['speed', False]],
+        'arguments': [['theta', True], ['speed', False], ['clockwise', False]],
         'handler': self.orientTo
       },
       {
@@ -233,7 +233,8 @@ class CommandsManager:
     return self.scripts.list()
   
   def execScript(self, components):
-    return self.scripts.run(components['name'])
+    self.scripts.run(components['name'])
+    return 'oK'
 
   def elevator(self, components):
     if 'speed' not in components:
@@ -250,7 +251,6 @@ class CommandsManager:
     if 'side' not in components:
       return None
     a = components['side']
-    print(a)
     if a not in ['left', 'right']:
       return None
     return self.clawsInstances[components['side']]
@@ -259,8 +259,15 @@ class CommandsManager:
     instance = self.parseClawSide(components)
     if instance == None:
       return 'ERR'
-    components['pos'] = int(components['pos'])
-    instance.directGoTo(components['pos'])
+    if components['pos'] == 'top':
+      instance.goTop()
+    elif components['pos'] == 'middle':
+      instance.goMiddle()
+    elif components['pos'] == 'bottom':
+      instance.goBottom()
+    else:
+      components['pos'] = int(components['pos'])
+      instance.directGoTo(components['pos'])
     return 'OK'
 
   def claws(self, components):
@@ -316,6 +323,8 @@ class CommandsManager:
   
   def orientTo(self, args):
     args = self.parseAngleArgs(args)
+    if 'clockwise' in args:
+      args['clockwise'] = bool(args['clockwise'])
     self.navigation.orientTo(**args)
     return 'OK'
 
