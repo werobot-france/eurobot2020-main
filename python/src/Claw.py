@@ -129,7 +129,7 @@ class Claw:
       self.clawsPos['open'][2]
     ])
 
-  def close(self, selector = None):
+  def sleep(self, selector = None):
     self.setAll([
       self.clawsPos['sleep'][0],
       self.clawsPos['sleep'][1],
@@ -143,8 +143,8 @@ class Claw:
       self.clawsPos['close'][2]
     ])
   
-  def sleep(self, selector = None):
-    self.setClawsAngle(50, selector)
+  # def sleep(self, selector = None):
+  #   self.setClawsAngle(50, selector)
 
   def stop(self):
     pass

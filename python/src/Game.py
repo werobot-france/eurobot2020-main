@@ -1,4 +1,5 @@
 from time import sleep
+from gpiozero import Button
 
 class Game:
   
@@ -13,6 +14,8 @@ class Game:
     
     # possible values 1, 2 or 3
     self.buosDisposition = 1
+    
+    self.startSwitch = Button(21, None, True)
 
   def arm(self, config):
     self.team = config['team']
@@ -20,20 +23,21 @@ class Game:
     
     self.logger.info('Robot armed!', config)
     # wait for the switch to activate
-    sleep(3)
+    #sleep(3)
+    self.startSwitch.wait_for_press()
     self.onStart()
   
   def onStart(self):
     self.logger.info('Started')
-    self.server.sendData('gameStart', [])
+    print(self.server.sendData('gameStart', []))
     # start a 100s timer
-    sleep(10)
+    sleep(100)
     self.onEnd()
   
   def onEnd(self):
     self.logger.info('End!')
-    self.server.sendData('gameEnd', [ self.score ])
+    print(self.server.sendData('gameEnd', [ self.score ]))
 
   def abort(self):
-    print('> Game: aborted!')
+    self.logger.info('Aborted!')
 

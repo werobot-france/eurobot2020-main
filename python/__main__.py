@@ -75,7 +75,7 @@ if __name__ == '__main__':
     },
     'clawsPos': {
       'open': [80, 134, 112], # 85, 120, 100
-      'sleep': [90, 90, 90],
+      'sleep': [143, 66, 48],
       'close': [163, 46, 28] # [170, 52, 30]
     }
   })
@@ -92,7 +92,7 @@ if __name__ == '__main__':
     },
     'clawsPos': {
       'open': [66, 159, 145],
-      'sleep': [90, 90, 90],
+      'sleep': [145, 82, 82],
       'close': [165, 62, 62]
     }
   })
@@ -111,7 +111,6 @@ if __name__ == '__main__':
   def app():
     #switches.start()
     ws.start()
-    #lidar.start()
     platform.stop()
     sleep(0.4)
     positionWatcher.reset()
@@ -119,6 +118,7 @@ if __name__ == '__main__':
     #lidar.start()
     #detection.whenDetected(90, 30)
     
+    # REMOVE BEFORE FLIGHT
     #detectionProcess.start()
     
     root.info('App ready')

@@ -28,7 +28,7 @@ class PWMDriver:
       print('> ERR!!! Invalid slot passed to setAngle!')
       return
     pulse = int(self.mappyt(angle, 0, profile['range'], profile['min'], profile['max']))
-    print('setting slot', slot, 'to angle', angle, 'with profile', profileName, profile, pulse)
+    #print('setting slot', slot, 'to angle', angle, 'with profile', profileName, profile, pulse)
     self.driver.set_pwm(slot, 0, pulse)
 
   def setPwm(self, slot, off, on):

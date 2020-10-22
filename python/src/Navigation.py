@@ -47,7 +47,7 @@ class Navigation:
       'backward': backward
     })
 
-    p, i, d = 150, 0, 0
+    p, i, d = 250, 0, 0
     sommeErreurs = differenceErreurs = erreurPre = orientationError = 0
 
     while not self.done:
