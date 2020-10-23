@@ -12,9 +12,14 @@ class Scripts:
     # module = list(map(__import__, ['src.scripts.test_script']))[0].__dict__['scripts'].__dict__['test_script'].__dict__['TestScript']()
     # print(module)
     # sys.exit()
+    
+  def exists(self, name):
+    if (name + '.py') not in os.listdir('src/scripts'):
+      return False
+    return True
 
   def run(self, name):
-    if (name + '.py') not in os.listdir('src/scripts'):
+    if not self.exists(name):
       return "Invalid script name"
     module = list(map(__import__, ['src.scripts.' + name]))[0].__dict__['scripts'].__dict__[name]
     imp.reload(module)

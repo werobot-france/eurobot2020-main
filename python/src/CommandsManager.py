@@ -116,6 +116,18 @@ class CommandsManager:
         'name': 'resumeNavigation',
         'description': 'Will resume the current navigation operation',
         'handler': self.resumeNavigation
+      },
+      {
+        'name': 'flag',
+        'description': 'Toggle, open or close the flag',
+        'arguments': [['pos', False]],
+        'handler': self.flag
+      },
+      {
+        'name': 'arm',
+        'description': 'Will prepare and arm the robot for a game',
+        'arguments': [['team', False], ['buosDisp', False], ['script', False]],
+        'handler': self.arm
       }
     ]
     def filter(item):
@@ -137,6 +149,8 @@ class CommandsManager:
     self.platform = self.container.get('platform')
     self.elevator = self.container.get('elevator')
     self.scripts = self.container.get('scripts')
+    self.flag = self.container.get('flag')
+    self.game = self.container.get('game')
   
   '''
   parse the command and return a string with a format type (text or json)
@@ -357,8 +371,36 @@ class CommandsManager:
 
   def pauseNavigation(self, _):
     self.navigation.pause()
+    # TODO: return ok only if the client is not the detection process
+    #return 'OK'
     return None
 
   def resumeNavigation(self, _):
     self.navigation.resume()
+    #return 'OK'
+    # TODO: return ok only if the client is not the detection process
     return None
+  
+  def flag(self, args):
+    if 'pos' in args:
+      if args['pos'] == 'open':
+        self.flag.open()
+      if args['pos'] == 'close':
+        self.flag.close()
+    else:
+      self.flag.toggle()
+    return 'OK'
+  
+  def arm(self, args):
+    script = None
+    config = {}
+    if 'script' in args:
+      script = args['script']
+    if 'team' in args:
+      config['team'] = args['team']
+    if 'buosDisp' in args:
+      config['buosDisp'] = args['buosDisp']
+    if len(config) != 2 and script == None:
+      return 'Invalid arm config!'
+    self.game.arm(config, script)
+    return 'OK'

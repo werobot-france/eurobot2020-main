@@ -7,6 +7,7 @@ class Detection:
 
   mustStop = False
   mustStopTmp = False
+  navigationPaused = False
 
   def __init__(self, container):
     self.logger = container.get('logger').get('Detection')
@@ -19,15 +20,20 @@ class Detection:
     x = res[0]
     y = res[1]
     theta = res[2][0]
+    
     return (x, y, theta)
   
   # facade to call navigation.pause throught ws
   def pause(self):
-    self.client.send('execCommand', {'payload': 'pauseNavigation'})
+    if not self.navigationPaused:
+      self.navigationPaused = True
+      self.client.send('execCommand', {'payload': 'pauseNavigation'})
 
   # facade to call navigation.resume throught ws
-  def resume(self):  
-    self.client.send('execCommand', {'payload': 'resumeNavigation'})
+  def resume(self):
+    if self.navigationPaused:
+      self.navigationPaused = False
+      self.client.send('execCommand', {'payload': 'resumeNavigation'})
 
   # this function is called when ever something is detected by the lidar
   def whenDetected(self, angle, dist):
@@ -39,11 +45,11 @@ class Detection:
       # BILAN
       if self.mustStop:
         self.pause()
-        self.logger.debug('Stop')
+        #self.logger.debug('Stop')
       else:
         # TODO: add a timeout to prevent from too frequent stop/restart of the navigation
         self.resume()
-        self.logger.debug('Nothing')
+        #self.logger.debug('Nothing')
       return
     
     # ask via websocket the current position (x, y, theta) of the robot
@@ -82,17 +88,17 @@ class Detection:
     margin = 100
     ma = self.getDistanceMax(x, y, absoluteAngle)
     isInTable = (horizontal - margin) < ma
-    if not isInTable:
-      self.logger.debug('Not in table')
-      return
-    print(horizontal, ma)
+    # if not isInTable:
+    #   self.logger.debug('Not in table')
+    #   return
+    #print(horizontal, ma)
     
     newStop = isRobot and isClose and isInTable
     if newStop:
       self.mustStopTmp = True
       self.mustStop = True
       self.pause()
-      self.logger.debug(degrees(angle), degrees(absoluteAngle), 'CALM DOWN! HANDS!')
+      #self.logger.debug(degrees(angle), degrees(absoluteAngle), 'CALM DOWN! HANDS!')
 
   # Walls :
   #               0

@@ -63,16 +63,16 @@ class Lidar:
   '''
   def watchDistances(self):
     while self.enabled:
-      sleep(0.01)
-      count = self.serial.in_waiting
-      if count > 8:
-        recv = self.serial.read(9)
-        self.serial.reset_input_buffer()
-        if recv[0] == 0x59 and recv[1] == 0x59:
-          self.dist = recv[2] + recv[3] * 256
-          # self.buffer.append([self.angle, self.dist])
-          Thread(target=self.communication, args = [[self.angle, self.dist]]).start()
-          #if debug: print("angel:", self.angle*2, inc, pos)
+      self.serial.reset_input_buffer()
+      sleep(0.02)
+      # count = self.serial.in_waiting
+      # if count > 8:
+      recv = self.serial.read(9)
+      if recv[0] == 0x59 and recv[1] == 0x59:
+        self.dist = recv[2] + recv[3] * 256
+        # self.buffer.append([self.angle, self.dist])
+        Thread(target=self.communication, args = [[self.angle, self.dist]]).start()
+        #if debug: print("angel:", self.angle*2, inc, pos)
   
   def run(self, debug=False):
     self.angle = 0

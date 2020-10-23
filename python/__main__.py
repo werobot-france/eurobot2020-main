@@ -17,6 +17,7 @@ from src.DetectionProcess import DetectionProcess
 from src.Claw import Claw
 from time import sleep
 from src.Logger import LoggerManager
+from src.Flag import Flag
 
 container = Container()
 
@@ -98,6 +99,9 @@ if __name__ == '__main__':
   })
   container.set('leftClaw', leftClaw)
   container.set('rightClaw', rightClaw)
+  
+  flag = Flag(container)
+  container.set('flag', flag)
   
   # elevator = Elevator(container)
   # container.set('elevator', elevator)

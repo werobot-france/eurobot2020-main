@@ -73,9 +73,9 @@ class Claw:
     self.directGoTo(self.elevatorPos['bottom'])
     
   def directGoTo(self, target):
-    # self.elevatorAngle = target
-    # self.setAngle(self.elevatorSlot, target)
-    self.goTo(target)
+    self.elevatorAngle = target
+    self.setAngle(self.elevatorSlot, target)
+    #self.goTo(target)
 
   def goTo(self, target, d = 0.20):
     self.fetchStatus()

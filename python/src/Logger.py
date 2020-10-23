@@ -39,6 +39,9 @@ class Logger:
   def error(self, *message):
     self.log(message, 'error')
     
+  def err(self, *message):
+    self.log(message, 'error')
+    
   def data(self, data):
     return json.dumps(data)
 

@@ -2,7 +2,8 @@ from math import *
 from ..API import API
 from time import sleep
 
-class Official1(API):
+class EmergencyH(API):
+  
   def run(self):
     self.rightClaw.goTop()
     self.rightClaw.open()

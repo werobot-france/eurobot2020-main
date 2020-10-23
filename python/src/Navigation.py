@@ -169,7 +169,7 @@ class Navigation:
 
       cmdG = cmdD = 0
       cmd = (orientationError*p) + (sommeErreurs*i) + (differenceErreurs*d)
-      if abs(cmd*speed/255) < 12: cmd = 12*255/speed * self.sign(cmd)
+      if abs(cmd*speed/255) < 10: cmd = 10*255/speed * self.sign(cmd)
       if abs(cmd) > 255: cmd = 255 * self.sign(cmd)
       cmd /= 255
       
