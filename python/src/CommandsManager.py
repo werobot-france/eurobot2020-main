@@ -248,7 +248,7 @@ class CommandsManager:
   
   def execScript(self, components):
     self.scripts.run(components['name'])
-    return 'oK'
+    return 'OK'
 
   def elevator(self, components):
     if 'speed' not in components:
