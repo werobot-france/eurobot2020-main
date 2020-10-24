@@ -1,7 +1,5 @@
 from time import sleep
 from .ThreadHelper import Thread
-from gpiozero import TonalBuzzer
-from gpiozero import Tone
 from ina219 import INA219
 from ina219 import DeviceRangeError
 
@@ -28,11 +26,12 @@ class PowerMonitor:
   # the alert level in amps
   threshold = 1
   
+  address = 0x44
+  
   def __init__(self, container = None, slot = 3):
     self.logger = container.get('logger').get('PowerMoni')
     self.buzzer = container.get('buzzer')
-    self.driver = TonalBuzzer(slot)
-    self.ws = self.container.get('ws')
+    self.ws = container.get('ws')
 
   def stop(self):
     self.logger.debug('Stopped')
@@ -41,10 +40,11 @@ class PowerMonitor:
   def start(self):
     self.logger.debug('Started')
     
-    self.driver = INA219(self.shuntResistance, self.maxExpected)
-    self.driver.configure(
-      self.driver.RANGE_16V
+    self.driver = INA219(
+      self.shuntResistance,
+      address=self.address
     )
+    self.driver.configure()
     
     self.monitorThread = Thread(target=self.monitor)
     self.monitorThread.start()

@@ -191,8 +191,9 @@ class Navigation:
         'coef': [p, i, d]
       })
       
-      if abs(orientationError) < threshold:
+      if abs(orientationError) < pi/4:
         clockwise = None
+      if abs(orientationError) < threshold:
         stopCount += 1
         if stopCount > 4:
           self.done = True

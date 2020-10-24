@@ -70,14 +70,14 @@ if __name__ == '__main__':
     'elevatorSlot': 12,
     'clawsSlot': [15, 13, 14], # front, mid, back
     'elevatorPos': {
-      'top': 32,
-      'middle': 165,
-      'bottom': 180
+      'top': 30,
+      'middle': 160,
+      'bottom': 170
     },
     'clawsPos': {
-      'open': [80, 134, 112], # 85, 120, 100
-      'sleep': [143, 66, 48],
-      'close': [163, 46, 28] # [170, 52, 30]
+      'open': [73, 125, 125], # 85, 120, 100
+      'sleep': [120, 82, 80],
+      'close': [136, 18, 40] # [170, 52, 30]
     }
   })
   rightClaw = Claw(container, {
@@ -94,7 +94,7 @@ if __name__ == '__main__':
     'clawsPos': {
       'open': [66, 159, 145],
       'sleep': [145, 82, 82],
-      'close': [165, 62, 62]
+      'close': [165, 61, 59]
     }
   })
   container.set('leftClaw', leftClaw)

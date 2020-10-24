@@ -9,6 +9,7 @@ from src.Logger import LoggerManager
 
 container = Container()
 
+
 logger = LoggerManager()
 logger.setLevel('debug')
 container.set('logger', logger)
@@ -16,4 +17,5 @@ container.set('logger', logger)
 buzzer = Buzzer(container)
 container.set('buzzer', buzzer)
 
-powerMonitor = PowerMonitor()
+powerMonitor = PowerMonitor(container)
+powerMonitor.start()
