@@ -19,8 +19,8 @@ container.set('platform', platform)
 platform.stop()
 sleep(2)
 platform.setSpeed([
-  0,
-  0
+  50,
+  50
 ])
 
 while True:

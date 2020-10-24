@@ -156,6 +156,7 @@ class WebSocketServer:
       self.clients
     ))
     
+    #print(topic, data, len(subscribers))
     for sub in subscribers:
       self.send(sub['instance'], topic, data)
     

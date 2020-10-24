@@ -36,6 +36,7 @@ class Claw:
 
     self.clawsProfile = config['clawsProfile']
     self.elevatorProfile = config['elevatorProfile']
+    self.id = config['id']
   
   def setAngle(self, slot, angle):
     if slot == self.elevatorSlot:
@@ -45,18 +46,21 @@ class Claw:
     self.driver.setAngle(slot, angle, profile)
   
   def fetchStatus(self):
-    status = open(self.base + '/claw-status.json')
+    status = open(self.base + '/claw-' + self.id + '-status.json')
     s = json.loads(status.read())
     status.close()
     self.elevatorAngle = s['elevator']
-    self.clawsAngle = s['claws']
+    #self.clawsAngle = s['claws']
   
   def saveStatus(self):
-    status = open(self.base + '/claw-status.json', 'w')
-    status.write(json.dumps({
+    status = open(self.base + '/claw-' + self.id + '-status.json', 'w')
+    d = json.dumps({
+      'id': self.id,
       'elevator': self.elevatorAngle,
-      'claws': self.clawsAngle
-    }))
+      #'claws': self.clawsAngle
+    })
+    print(self.id, 'saving status of claw', d)
+    status.write(d)
     status.close()
     
   def goMiddle(self):
@@ -71,6 +75,7 @@ class Claw:
   def directGoTo(self, target):
     self.elevatorAngle = target
     self.setAngle(self.elevatorSlot, target)
+    #self.goTo(target)
 
   def goTo(self, target, d = 0.20):
     self.fetchStatus()
@@ -83,7 +88,7 @@ class Claw:
       if delta > 0:
         self.elevatorAngle += interstice if abs(delta) >= interstice else delta
       else:
-        self.elevatorAngle -= interstice if abs(delta) >= interstice else delta
+        self.elevatorAngle -= interstice if abs(delta) >= interstice else -delta
       print('angle', self.elevatorAngle)
       self.setAngle(self.elevatorSlot, self.elevatorAngle)
       delta = target - self.elevatorAngle
@@ -118,23 +123,28 @@ class Claw:
     self.setAngle(self.clawsSlot[2], angles[2])
 
   def open(self, selector = None):
-    print('OPEN')
     self.setAll([
       self.clawsPos['open'][0],
       self.clawsPos['open'][1],
       self.clawsPos['open'][2]
     ])
 
+  def sleep(self, selector = None):
+    self.setAll([
+      self.clawsPos['sleep'][0],
+      self.clawsPos['sleep'][1],
+      self.clawsPos['sleep'][2]
+    ])
+
   def close(self, selector = None):
-    print('CLOSE')
     self.setAll([
       self.clawsPos['close'][0],
       self.clawsPos['close'][1],
       self.clawsPos['close'][2]
     ])
   
-  def sleep(self, selector = None):
-    self.setClawsAngle(50, selector)
+  # def sleep(self, selector = None):
+  #   self.setClawsAngle(50, selector)
 
   def stop(self):
     pass

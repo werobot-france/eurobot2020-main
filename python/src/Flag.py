@@ -7,10 +7,9 @@ Goal: to enable the flag at the 95'' second
 '''
 class Flag:
 
+  opened = False
   driver = None
-  
-  # the last servo slot of the first slots block
-  servoSlot = 3
+  servoSlot = 6
   
   def __init__(self, container = None):
     self.logger = container.get('logger').get('Flag')
@@ -18,13 +17,21 @@ class Flag:
     if self.driver == None:
       self.logger.warn('mocked!')
 
-  def open(self, values):
-    self.driver.setAngle(self.servoSlot, 0, 'flag')
-    self.logger.info('opened!')
-
-  def close(self, values):
+  def open(self):
+    self.opened = True
     self.driver.setAngle(self.servoSlot, 90, 'flag')
-    self.logger.info('closed!')
+    self.logger.info('Opened!')
+
+  def close(self):
+    self.opened = False
+    self.driver.setAngle(self.servoSlot, 180, 'flag')
+    self.logger.info('Closed!')
+  
+  def toggle(self):
+    if self.opened:
+      self.close()
+    else:
+      self.open()
 
   def start(self):
     self.mainThread = Thread(target=self.run)
@@ -35,7 +42,9 @@ class Flag:
   
   def run(self):
     self.close()
-    self.logger.info('started, ready to fire!')
-    sleep(95)
+    self.logger.info('Starting timer, ready to fire!')
+    # to change!!
+    sleep(20)
+    self.logger.info('95 seconds ellapsed!')
     self.open()
 

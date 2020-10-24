@@ -57,8 +57,8 @@ if __name__ == '__main__':
   navigation = Navigation(container)
   container.set('navigation', navigation)
   
-  rightClaw = Claw(container, {'elevator': 7, 'claws': [6, 5, 4]})
-  container.set('rightClaw', rightClaw)
+  # rightClaw = Claw(container, {'elevator': 7, 'claws': [6, 5, 4]})
+  # container.set('rightClaw', rightClaw)
   
   # elevator = Elevator(container)
   # container.set('elevator', elevator)
@@ -76,7 +76,7 @@ if __name__ == '__main__':
   def app():
     #switches.start()
     ws.start()
-    #lidar.start()
+    lidar.start()
     sleep(1)
     platform.stop()
     sleep(1)

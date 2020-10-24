@@ -13,7 +13,7 @@ class PositionWatcher:
   # lateralPerimeter = 60*pi
   #-OLDHOLONOMIC%END
   
-  perimeter = 210#205
+  perimeter = 207 #210#205
   
   #-OLDHOLONOMIC%START
   # distance entre les deux encodeurs latéraux (milieux) (arrête de la base)
@@ -23,7 +23,7 @@ class PositionWatcher:
   # backAxialDistance = 110
   #-OLDHOLONOMIC%END
   
-  axialDistance = 236.5#233.5
+  axialDistance = 235#236.5#233.5
   
   #-OLDHOLONOMIC%START
   # coté bleu x: 979, y: 159
@@ -53,12 +53,12 @@ class PositionWatcher:
   #-OLDHOLONOMIC%END
   
   # left (scotch rouge) encodeur
-  phaseA = DigitalInputDevice(16, True)
-  phaseB = DigitalInputDevice(6, True)
+  phaseA = DigitalInputDevice(27, True)
+  phaseB = DigitalInputDevice(17, True)
   
   # right (sans scotch) encodeur
-  phaseC = DigitalInputDevice(19, True)
-  phaseD = DigitalInputDevice(5, True)
+  phaseC = DigitalInputDevice(5, True)
+  phaseD = DigitalInputDevice(16, True)
 
   
   watchPositionThread = None
