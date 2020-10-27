@@ -33,15 +33,23 @@ class Navigation:
     speed = 50 if 'speed' not in args else args['speed']
     speed /= 2
     threshold = 10 if 'threshold' not in args else args['threshold']
-    stopOn = None if 'stopOn' not in args else args['stopOn']
+    #stopOn = None if 'stopOn' not in args else args['stopOn']
     backward = False if 'backward' not in args else args['backward']
+    
+    
+    # stop on slips marche comme  ça:
+    # on regarde tout les 10 cycles de combien le robot à avancé avec deltaDist
+    # si la dist avancé pendant ces 10 derniers cycles est infé à un threshold on se stoppe
+    # quand stopOnSlip est à True, il n'y a plus de check pour savoir si le robot est arrivé
+    # WARNING: VERY UNSTABLE WHEN TRAVELING BIG DISTANCES
+    stopOnSlip = False if 'stopOnSlip' not in args else args['stopOnSlip']
 
     self.done = False
     self.logger.info("GoTo", {
       'x': targetX,
       'y': targetY,
       'theta': degrees(orientation) if orientation != None else None,
-      'stopOn': stopOn,
+      'stopOnSlip': stopOnSlip,
       'speed': speed,
       'threshold': threshold,
       'backward': backward
@@ -49,7 +57,11 @@ class Navigation:
 
     p, i, d = 250, 0, 0
     sommeErreurs = differenceErreurs = erreurPre = orientationError = 0
-
+    
+    lastSlipPeriodDist = None
+    slipCheckThreshold = 5
+    slipCheckCount = 0
+    
     while not self.done:
       x, y, theta = self.positionWatcher.getPos()
       if theta > pi: theta -= 2*pi
@@ -95,8 +107,17 @@ class Navigation:
       else:
         self.platform.setSpeed([cmdG, cmdD])
 
-      if targetDistance < threshold:
+      if targetDistance < threshold and not stopOnSlip:
         self.done = True
+      
+      # Check if a slip is happening
+      slipCheckCount += 1
+      if slipCheckCount >= 10:
+        if lastSlipPeriodDist != None:
+          if abs(lastSlipPeriodDist - targetDistance) < slipCheckThreshold:
+            self.done = True
+        slipCheckCount = 0
+        lastSlipPeriodDist = targetDistance
       
       self.logger.debug({
         'x': round(x, 0),
@@ -110,7 +131,7 @@ class Navigation:
         'coef': [p, i, d]
       })
 
-      # stop quand ya un robot
+      # Pause the navigation
       while self.isPaused:
         self.platform.stop()
         sleep(1)
@@ -133,14 +154,21 @@ class Navigation:
     speed = 30 if 'speed' not in args else args['speed']
     threshold = pi/100 if 'threshold' not in args else args['threshold']
     clockwise = None if 'clockwise' not in args else args['clockwise']
-
-    self.done = False
+    fullRotation = None if 'fullRotation' not in args else args['fullRotation']
+    
     theta = self.positionWatcher.getTheta()
+    fullRotationMiddle = (theta + 0.85*pi)%(2*pi)
+    print(degrees(theta))
+    print(degrees(theta+pi/4))
+    print(degrees(fullRotationMiddle))
+    
+    self.done = False
     self.logger.info("OrientTo", {
       'threshold': degrees(threshold),
       'currentTheta': degrees(theta),
       'targetTheta': degrees(targetTheta),
       'speed': speed,
+      'fullRotation': fullRotation,
       'clockwise': clockwise
     })
 
@@ -148,24 +176,36 @@ class Navigation:
     sommeErreurs = differenceErreurs = erreurPre = orientationError = 0
 
     stopCount = 0
+    once = False
     while not self.done:
       x, y, theta = self.positionWatcher.getPos()
-      if theta > pi: theta -= 2*pi
+      if theta > pi:
+        theta -= 2*pi
+        if fullRotationMiddle > pi:
+          fullRotationMiddle -= 2*pi
 
-      errorsChoice = [
-        (targetTheta - theta),
-        (targetTheta + 2*pi - theta),
-        (targetTheta - 2*pi - theta)
-      ]
-      formattedChoices = list(map(lambda p: abs(p), errorsChoice))
-      minO = min(formattedChoices)
-      
-      if clockwise == None:
-        orientationError = errorsChoice[formattedChoices.index(minO)]
-      elif clockwise:
-        orientationError = -1*minO
+      if not once and fullRotation and theta < fullRotationMiddle:
+        orientationError = 2*pi
+        if clockwise:
+          orientationError *= -1
+        print('INF')
       else:
-        orientationError = minO
+        print('SUP')
+        once = True
+        errorsChoice = [
+          (targetTheta - theta),
+          (targetTheta + 2*pi - theta),
+          (targetTheta - 2*pi - theta)
+        ]
+        formattedChoices = list(map(lambda p: abs(p), errorsChoice))
+        minO = min(formattedChoices)
+        
+        if clockwise == None:
+          orientationError = errorsChoice[formattedChoices.index(minO)]
+        elif clockwise:
+          orientationError = -1*minO
+        else:
+          orientationError = minO
 
       cmdG = cmdD = 0
       cmd = (orientationError*p) + (sommeErreurs*i) + (differenceErreurs*d)
@@ -193,7 +233,10 @@ class Navigation:
       
       if abs(orientationError) < pi/4:
         clockwise = None
-      if abs(orientationError) < threshold:
+      
+      # we disable the threshold
+      
+      if not (fullRotation and not once) and abs(orientationError) < threshold:
         stopCount += 1
         if stopCount > 4:
           self.done = True

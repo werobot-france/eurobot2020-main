@@ -8,23 +8,40 @@ This class manage all the odometry operations
 '''
 class PositionWatcher:
   
-  perimeter = 202.6 #200#207#210#205
+  # Constants to tweak
   
-  # 235
-  axialDistance = 224.5 #235#236.5#233.5
+  # - NUMBER OF ENCODER STEPS PER MM or pulsePerMm
+  # 1 wheel turn = 2400 steps
+  # 1 wheel turn = 203 mm
+  # so: 2400 steps for 203 mm
+  #       ?  steps for  1 mm
+  # so pulsePerMm =  tickPerRevolution/perimeter
+  # base value = 2400/200 = 12
+  pulsePerMm = 12.426
   
+  # - DIFFERENCE OF DIAMETER BETWEEN ENCODER WHEELS
+  # new gains 1.0178356122979364 0.9815060600778654
+  leftGain = 1.0078547888487952
+  rightGain = 0.9916807015283461
+  
+  #perimeter = 202.6 #200#207#210#205
+  
+  # - DISTANCE BETWEEN THE ENCODER: ROBOT TRACK OR AXIAL DISTANCE
+  # 235, 224.5
+  axialDistance = 214.79858961797177  #235#236.5#233.5
+  
+  # DEFAULT POSITION at the start of a match
   defaultX = 623.5 #900
   defaultY = 203 #200
   defaultTheta = pi
 
-  # left (scotch rouge) encodeur
+  # left wheel encoder (scotch rouge)
   phaseA = DigitalInputDevice(27, True)
   phaseB = DigitalInputDevice(17, True)
   
-  # right (sans scotch) encodeur
+  # right wheel encoder (sans scotch)
   phaseC = DigitalInputDevice(5, True)
   phaseD = DigitalInputDevice(16, True)
-
   
   watchPositionThread = None
   watchTicksThread = None
@@ -33,8 +50,8 @@ class PositionWatcher:
   watchPositionEnabled = False
 
   positionChangedHandler = None
-  
-  ignoreXChanges = False 
+
+  ignoreXChanges = False
 
   def __init__(self, container):
     self.logger = container.get('logger').get('PositionWatcher')
@@ -88,12 +105,17 @@ class PositionWatcher:
       )
       self.oldTicks = newTicks
       
-      leftDistance = deltaTicks[0] / 2400 * self.perimeter
-      rightDistance = deltaTicks[1] / 2400 * self.perimeter
-
+      #pulsePerMm =  tickPerRevolution/perimeter
+      # dist = delta_ticks*(perimeter/ticksPerRevolution)
+      # dist = delta_tics/pulsePermm
+      
+      # leftDistance = deltaTicks[0] / 2400 * self.perimeter
+      # rightDistance = deltaTicks[1] / 2400 * self.perimeter
+      leftDistance = deltaTicks[0]*self.leftGain/self.pulsePerMm
+      rightDistance = deltaTicks[1]*self.rightGain/self.pulsePerMm
+      
       tb = (leftDistance + rightDistance) / 2
       deltaTheta = (rightDistance - leftDistance) / self.axialDistance
-      
       
       self.theta += deltaTheta
       self.theta = self.theta % (2*pi)
@@ -175,6 +197,10 @@ class PositionWatcher:
       'y': round(self.y, 0),
       'theta': round(degrees(self.theta), 2)
     })
+
+  def setGains(self, leftGain, rightGain):
+    self.leftGain = leftGain
+    self.rightGain = rightGain
 
   def reset(self, log = True):
     self.x = self.defaultX

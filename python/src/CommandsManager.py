@@ -104,7 +104,7 @@ class CommandsManager:
       {
         'name': 'orientTo',
         'description': 'Will orient to the desired angle',
-        'arguments': [['theta', True], ['speed', False], ['clockwise', False]],
+        'arguments': [['theta', True], ['speed', False], ['clockwise', False], ['fullRotation', False]],
         'handler': self.orientTo
       },
       {
