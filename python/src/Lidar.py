@@ -24,7 +24,7 @@ class Lidar:
   watchDistancesThread = None
   communicateThread = None
   
-  servoSlot = 7
+  servoSlot = 4
 
   def __init__(self, container):
     self.serial = serial.Serial("/dev/ttyAMA0", 115200)

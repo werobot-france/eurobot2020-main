@@ -85,12 +85,14 @@ class LoggerManager:
         message += var + ' '
       else:
         message += str(var) + ' '
+        
+    #print(rawMessage, level, name)
     
-    if level not in self.levels:
-      return
+    # if level not in self.levels:
+    #   return
     
-    if list(self.levels.keys()).index(level) < self.outputLevel:
-      return
+    # if list(self.levels.keys()).index(level) < self.outputLevel:
+    #   return
     
     level = self.levels[level]
     

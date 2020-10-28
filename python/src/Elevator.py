@@ -10,9 +10,9 @@ class Elevator:
     self.pca = PCA9685(i2c)
     self.pca.frequency = 50
 
-    self.left  = servo.Servo(self.pca.channels[1])
-    self.mid   = servo.Servo(self.pca.channels[0], min_pulse=500, max_pulse=2000)
-    self.right = servo.Servo(self.pca.channels[2])
+    self.left  = servo.Servo(self.pca.channels[0])
+    self.mid   = servo.Servo(self.pca.channels[2], min_pulse=500, max_pulse=2000)
+    self.right = servo.Servo(self.pca.channels[1])
     
     self.arduino = container.get('arduinoStepper')
 

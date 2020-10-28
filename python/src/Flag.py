@@ -9,7 +9,7 @@ class Flag:
 
   opened = False
   driver = None
-  servoSlot = 6
+  servoSlot = 11
   
   def __init__(self, container = None):
     self.logger = container.get('logger').get('Flag')
@@ -19,12 +19,12 @@ class Flag:
 
   def open(self):
     self.opened = True
-    self.driver.setAngle(self.servoSlot, 90, 'flag')
+    self.driver.setAngle(self.servoSlot, 50, 'flag')
     self.logger.info('Opened!')
 
   def close(self):
     self.opened = False
-    self.driver.setAngle(self.servoSlot, 180, 'flag')
+    self.driver.setAngle(self.servoSlot, 0, 'flag')
     self.logger.info('Closed!')
   
   def toggle(self):
@@ -46,4 +46,3 @@ class Flag:
     sleep(95)
     self.logger.info('95 seconds ellapsed!')
     self.open()
-

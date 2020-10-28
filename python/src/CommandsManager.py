@@ -87,14 +87,8 @@ class CommandsManager:
       {
         'name': 'claws',
         'description': 'Set angle of claws servo',
-        'arguments': [['side', True], ['angle', True], ['select', False]],
+        'arguments': [['angle', True], ['select', False]],
         'handler': self.claws
-      },
-      {
-        'name': 'clawPos',
-        'description': 'Set pos of the claw',
-        'arguments': [['side', True], ['pos', True]],
-        'handler': self.clawPos
       },
       {
         'name': 'clawsAngles',
@@ -112,6 +106,12 @@ class CommandsManager:
         'description': 'Will orient to the desired angle',
         'arguments': [['theta', True], ['speed', False], ['clockwise', False], ['fullRotation', False]],
         'handler': self.orientTo
+      },
+      {
+        'name': 'schlager',
+        'description': 'Main Actionner',
+        'arguments': [['pos', False]],
+        'handler': self.schlager
       },
       {
         'name': 'pauseNavigation',
@@ -134,6 +134,12 @@ class CommandsManager:
         'description': 'Will prepare and arm the robot for a game',
         'arguments': [['team', False], ['buosDisp', False], ['script', False]],
         'handler': self.arm
+      },
+      {
+        'name': 'detection',
+        'description': 'Toggle detection process',
+        'arguments': [['state', False]],
+        'handler': self.detection
       },
     ]
     def filter(item):
@@ -404,4 +410,26 @@ class CommandsManager:
     if len(config) != 2 and script == None:
       return 'Invalid arm config!'
     self.game.arm(config, script)
+    return 'OK'
+
+  def schlager(self, args):
+    i = self.container.get('schlager')
+    if 'pos' not in args:
+      i.toggle()
+    else:
+      if args['pos'] == 'open':
+        i.open()
+      elif args['pos'] == 'close':
+        i.close()
+    return 'OK'
+    
+  def detection(self, args):
+    i = self.container.get('detectionProcess')
+    if 'state' not in args:
+      i.toggle()
+    else:
+      if args['state'] == 'enable':
+        i.start()
+      elif args['state'] == 'disable':
+        i.stop()
     return 'OK'
