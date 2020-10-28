@@ -8,7 +8,7 @@ Abstration of the buzzer
 '''
 class Buzzer:
 
-  buzzerSlot = 0
+  buzzerSlot = 6
   driver = None
   playingThread = None
   currentMelody = None

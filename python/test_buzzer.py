@@ -17,3 +17,4 @@ buzzer = Buzzer(container)
 container.set('buzzer', buzzer)
 
 powerMonitor = PowerMonitor()
+powerMonitor.start()
