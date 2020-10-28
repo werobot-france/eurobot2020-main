@@ -13,7 +13,7 @@ from src.CommandsManager import CommandsManager
 from src.ArduinoManager import ArduinoManager
 from src.Scripts import Scripts
 from src.DetectionProcess import DetectionProcess
-#from src.Elevator import Elevator
+from src.Elevator import Elevator
 from src.Claw import Claw
 from time import sleep
 from src.Logger import LoggerManager
@@ -51,8 +51,8 @@ if __name__ == '__main__':
   detectionProcess = DetectionProcess(container)
   container.set('detectionProcess', detectionProcess)
 
-  # switches = Switches(container)
-  # container.set('switches', switches)
+  switches = Switches(container)
+  container.set('switches', switches)
 
   driver = PWMDriver()
   container.set('driver', driver)
@@ -63,48 +63,11 @@ if __name__ == '__main__':
   navigation = Navigation(container)
   container.set('navigation', navigation)
   
-  leftClaw = Claw(container, {
-    'id': 'left',
-    'clawsProfile': 'china',
-    'elevatorProfile': 'lidar',
-    'elevatorSlot': 12,
-    'clawsSlot': [15, 13, 14], # front, mid, back
-    'elevatorPos': {
-      'top': 30,
-      'middle': 160,
-      'bottom': 170
-    },
-    'clawsPos': {
-      'open': [73, 125, 125], # 85, 120, 100
-      'sleep': [120, 82, 80],
-      'close': [136, 18, 40] # [170, 52, 30]
-    }
-  })
-  rightClaw = Claw(container, {
-    'id': 'right',
-    'clawsProfile': 'rev',
-    'elevatorProfile': 'rev',
-    'elevatorSlot': 11,
-    'clawsSlot': [10, 9, 8],
-    'elevatorPos': {
-      'top': 0,
-      'middle': 130,
-      'bottom': 165
-    },
-    'clawsPos': {
-      'open': [66, 159, 145],
-      'sleep': [125, 82, 82],
-      'close': [165, 61, 59]
-    }
-  })
-  container.set('leftClaw', leftClaw)
-  container.set('rightClaw', rightClaw)
-  
   flag = Flag(container)
   container.set('flag', flag)
   
-  # elevator = Elevator(container)
-  # container.set('elevator', elevator)
+  elevator = Elevator(container)
+  container.set('elevator', elevator)
   commandsManager.init()
 
   def onPos(x, y, t):
@@ -113,14 +76,12 @@ if __name__ == '__main__':
   positionWatcher.setPositionChangedHandler(onPos)
 
   def app():
-    #switches.start()
+    switches.start()
     ws.start()
     platform.stop()
     sleep(0.4)
     positionWatcher.reset()
     positionWatcher.start()
-    #lidar.start()
-    #detection.whenDetected(90, 30)
     
     # REMOVE BEFORE FLIGHT
     #detectionProcess.start()
@@ -138,12 +99,12 @@ if __name__ == '__main__':
   except KeyboardInterrupt:
     print('')
     root.error('KeyboardInterrupt: App will shutdown in a few moments')
-    #switches.stop()
+    switches.stop()
     scripts.stop()
     navigation.stop()
     positionWatcher.stop()
     platform.stop()
-    #elevator.stop()
+    elevator.stop()
     ws.stop()
     platform.stop()
     sys.exit()

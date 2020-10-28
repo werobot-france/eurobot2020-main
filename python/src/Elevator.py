@@ -73,7 +73,6 @@ class Elevator:
     )
     self.stop()
 
-
   # elevator go to TOP
   # elevator go to TAKE
   # elevator go to BOTTOM

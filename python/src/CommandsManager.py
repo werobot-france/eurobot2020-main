@@ -44,10 +44,16 @@ class CommandsManager:
         'handler': self.setPos
       },
       {
-        'name': 'ignoreXChanges',
-        'description': "Arbitrary disable x encoders",
+        'name': 'ignoreSidesChanges',
+        'description': "Arbitrary disable side encoder",
         'arguments': [['val', True]],
-        'handler': self.toggleIgnoreXChanges
+        'handler': self.toggleIgnoreSidesChanges
+      },
+      {
+        'name': 'ignoreBackChanges',
+        'description': "Arbitrary disable back encoder",
+        'arguments': [['val', True]],
+        'handler': self.toggleIgnoreBackChanges
       },
       {
         'name': 'goto',
@@ -261,18 +267,18 @@ class CommandsManager:
       self.elevator.goTo(components['steps'], components['speed'])
     return 'OK'
   
-  def clawPos(self, components):
-    instance = self.elevator
-    if components['pos'] == 'top':
-      instance.goTop()
-    elif components['pos'] == 'middle':
-      instance.goMiddle()
-    elif components['pos'] == 'bottom':
-      instance.goBottom()
-    else:
-      components['pos'] = int(components['pos'])
-      instance.goTo(components['pos'])
-    return 'OK'
+  # def clawPos(self, components):
+  #   instance = self.elevator
+  #   if components['pos'] == 'top':
+  #     instance.goTop()
+  #   elif components['pos'] == 'middle':
+  #     instance.goMiddle()
+  #   elif components['pos'] == 'bottom':
+  #     instance.goBottom()
+  #   else:
+  #     components['pos'] = int(components['pos'])
+  #     instance.goTo(components['pos'])
+  #   return 'OK'
 
   def claws(self, components):
     instance = self.elevator
@@ -292,10 +298,11 @@ class CommandsManager:
     return 'OK'
   
   def clawsAngles(self, components):
-    instance = self.parseClawSide(components)
-    if instance == None:
-      return 'ERR'
-    self.parseClawSide(components)
+    # instance = self.parseClawSide(components)
+    # if instance == None:
+    #   return 'ERR'
+    # self.parseClawSide(components)
+    instance = self.elevator
     instance.setAll([components['l'], components['m'], components['r']])
     return 'OK'
 
@@ -349,8 +356,12 @@ class CommandsManager:
     self.positionWatcher.setPos(args['x'], args['y'], args['theta'])
     return 'OK'
   
-  def toggleIgnoreXChanges(self, args):
-    self.positionWatcher.setIgnoreXChanges(not self.positionWatcher.ignoreXChanges)
+  def toggleIgnoreSidesChanges(self, args):
+    self.positionWatcher.setIgnoreSidesChanges(not self.positionWatcher.ignoreSidesChanges)
+    return 'OK'
+  
+  def toggleIgnoreBackChanges(self, args):
+    self.positionWatcher.setIgnoreBackChanges(not self.positionWatcher.ignoreBackChanges)
     return 'OK'
   
   def example(self, components):
