@@ -80,13 +80,6 @@ class Game(API):
     self.platform.stop()
     # display score
     print(self.server.sendData('gameEnd', [ self.score ]))
-  
-  # def onStart(self):
-    
-  #   self.onEnd()
-  
-  # def onEnd(self):
-    
 
   def abort(self):
     self.logger.info('Aborted!')

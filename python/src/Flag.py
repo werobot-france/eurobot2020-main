@@ -3,7 +3,7 @@ from .ThreadHelper import Thread
 
 '''
 Abstration of the flag component
-Goal: to enable the flag at the 95'' second
+Goal: to enable the flag at the 95 second
 '''
 class Flag:
 
@@ -43,8 +43,7 @@ class Flag:
   def run(self):
     self.close()
     self.logger.info('Starting timer, ready to fire!')
-    # to change!!
-    sleep(20)
+    sleep(95)
     self.logger.info('95 seconds ellapsed!')
     self.open()
 
