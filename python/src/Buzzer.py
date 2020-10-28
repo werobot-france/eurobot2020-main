@@ -1,7 +1,6 @@
 from time import sleep
-from .ThreadHelper import Thread
 from gpiozero import TonalBuzzer
-from gpiozero import Tone
+from .ThreadHelper import Thread
 
 '''
 Abstration of the buzzer
@@ -35,6 +34,7 @@ class Buzzer:
         self.driver.play(note[0])
         sleep(note[1])
       count += 1
+    self.driver.stop()
 
   def armedSound(self):
     self.playMelody({

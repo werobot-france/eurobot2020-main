@@ -21,7 +21,10 @@ positionWatcher.start()
 container.set('positionWatcher', positionWatcher)
 
 def onChange(x, y, theta):
-  print(round(x, 2), round(y, 2), round(degrees(theta), 3))
+  leftDistance = positionWatcher.leftTicks*positionWatcher.leftGain/positionWatcher.pulsePerMm
+  rightDistance = positionWatcher.rightTicks*positionWatcher.rightGain/positionWatcher.pulsePerMm
+  
+  print(leftDistance, rightDistance)
 
 def app():
   positionWatcher.setPositionChangedHandler(onChange)
