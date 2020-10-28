@@ -72,12 +72,12 @@ class CommandsManager:
         'arguments': [['name', True]],
         'handler': self.execScript
       },
-      # {
-      #   'name': 'elevator',
-      #   'description': 'Stepper goto or origin',
-      #   'arguments': [['steps', True], ['speed', False]],
-      #   'handler': self.elevator
-      # },
+      {
+        'name': 'elevator',
+        'description': 'Stepper goto or origin',
+        'arguments': [['steps', True], ['speed', False]],
+        'handler': self.elevator
+      },
       {
         'name': 'claws',
         'description': 'Set angle of claws servo',
@@ -128,7 +128,7 @@ class CommandsManager:
         'description': 'Will prepare and arm the robot for a game',
         'arguments': [['team', False], ['buosDisp', False], ['script', False]],
         'handler': self.arm
-      }
+      },
     ]
     def filter(item):
       item.pop('handler', None)
@@ -261,18 +261,8 @@ class CommandsManager:
       self.elevator.goTo(components['steps'], components['speed'])
     return 'OK'
   
-  def parseClawSide(self, components):
-    if 'side' not in components:
-      return None
-    a = components['side']
-    if a not in ['left', 'right']:
-      return None
-    return self.clawsInstances[components['side']]
-  
   def clawPos(self, components):
-    instance = self.parseClawSide(components)
-    if instance == None:
-      return 'ERR'
+    instance = self.elevator
     if components['pos'] == 'top':
       instance.goTop()
     elif components['pos'] == 'middle':
@@ -281,13 +271,11 @@ class CommandsManager:
       instance.goBottom()
     else:
       components['pos'] = int(components['pos'])
-      instance.directGoTo(components['pos'])
+      instance.goTo(components['pos'])
     return 'OK'
 
   def claws(self, components):
-    instance = self.parseClawSide(components)
-    if instance == None:
-      return 'ERR'
+    instance = self.elevator
     selector = None
     if 'select' in components:
       selector = eval(components['select'])
@@ -295,6 +283,8 @@ class CommandsManager:
       instance.open(selector)
     elif components['angle'] == 'sleep':
       instance.sleep(selector)
+    elif components['angle'] == 'lighthouse':
+      instance.lighthouse(selector)
     elif components['angle'] == 'close':
       instance.close(selector)
     else: 

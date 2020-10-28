@@ -10,9 +10,9 @@ class Elevator:
     self.pca = PCA9685(i2c)
     self.pca.frequency = 50
 
-    self.left  = servo.Servo(self.pca.channels[11])
-    self.mid   = servo.Servo(self.pca.channels[10])
-    self.right = servo.Servo(self.pca.channels[9])
+    self.left  = servo.Servo(self.pca.channels[1])
+    self.mid   = servo.Servo(self.pca.channels[0], min_pulse=500, max_pulse=2000)
+    self.right = servo.Servo(self.pca.channels[2])
     
     self.arduino = container.get('arduinoStepper')
 
@@ -20,7 +20,7 @@ class Elevator:
     if selector == None:
       selector = ['left', 'mid', 'right']
     if 'left' in selector:
-      self.left.angle = angle - 5
+      self.left.angle = (180 - angle)
     if 'mid' in selector:
       self.mid.angle = angle - 5
     if 'right' in selector:
@@ -35,10 +35,33 @@ class Elevator:
   #       self.left.angle = 190 - angle
 
   def open(self, selector = None):
-    self.setClawsAngle(120, selector)
+    self.left.angle = 135
+    self.mid.angle = 158
+    self.right.angle = 55
 
   def close(self, selector = None):
-    self.setClawsAngle(30, selector)
+    self.left.angle = 15
+    self.mid.angle = 23
+    self.right.angle = 163
+
+  def sleep(self, selector = None):
+    self.left.angle = 90
+    self.mid.angle = 90
+    self.right.angle = 90
+  
+  def lighthouse(self, selector = None):
+    self.left.angle = 90
+    self.mid.angle = 50
+    self.right.angle = 90
+
+  def setAll(self, angles):
+    print('SET ALL CLAWS!', angles)
+    self.left.angle = angles[0]
+    self.mid.angle = angles[1]
+    self.right.angle = angles[2]
+
+  # top
+  # lighthouse enable: 40
 
   def goTo(self, position, speed = 300):
     # pos haute: 500 steps
