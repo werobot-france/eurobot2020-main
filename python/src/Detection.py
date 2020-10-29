@@ -8,6 +8,7 @@ class Detection:
   mustStop = False
   mustStopTmp = False
   navigationPaused = False
+  blindRange = None
 
   def __init__(self, container):
     self.logger = container.get('logger').get('Detection')
@@ -52,6 +53,12 @@ class Detection:
         #self.logger.debug('Nothing')
       return
     
+    # Vérification de la range
+    # print(self.blindRange, angle)
+    # if self.blindRange != None and angle >= self.blindRange[0] and angle <= self.blindRange[1]:
+    #   print('IGNORED')
+    #   return
+    
     # ask via websocket the current position (x, y, theta) of the robot
     x, y, theta = self.fetchPosition()
     
@@ -94,6 +101,14 @@ class Detection:
     #print(horizontal, ma)
     
     newStop = isRobot and isClose and isInTable
+    
+    angleDeg = degrees(angle)
+    # print(ma)
+    # print(self.blindRange, angleDeg)
+    if self.blindRange != None and angleDeg >= self.blindRange[0] and angleDeg <= self.blindRange[1]:
+      #print('IGNORED')
+      return
+    
     if newStop:
       self.mustStopTmp = True
       self.mustStop = True

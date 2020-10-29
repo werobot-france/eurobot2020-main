@@ -13,17 +13,42 @@ class Scripts:
     # print(module)
     # sys.exit()
     
+  # Now take in account nested script
   def exists(self, name):
-    if (name + '.py') not in os.listdir('src/scripts'):
+    path = 'src/scripts'
+    compo = name.split('/')
+    if len(compo) == 1:
+      name = compo[0]
+    if len(compo) == 2:
+      path += '/' + compo[0]
+      name = compo[1]
+    if (name + '.py') not in os.listdir(path):
       return False
     return True
 
   def run(self, name):
     if not self.exists(name):
       return "Invalid script name"
-    module = list(map(__import__, ['src.scripts.' + name]))[0].__dict__['scripts'].__dict__[name]
-    imp.reload(module)
-    script = module.__dict__[name](self.container)
+    # different way of importing thing wheter we have a simple or a complex path
+    compo = name.split('/')
+    if len(compo) == 1:
+      module = list(
+        map(
+          __import__,
+          ['src.scripts.' + name]
+        )
+      )[0].__dict__['scripts'].__dict__[name]
+      imp.reload(module)
+      script = module.__dict__[name](self.container)
+    else:
+      module = list(
+        map(
+          __import__,
+          ['src.scripts.' + compo[0] + '.' + compo[1]]
+        )
+      )[0].__dict__['scripts'].__dict__[compo[1]]
+      imp.reload(module)
+      script = module.__dict__[compo[1]](self.container)
     self.logger.info('Starting', name, 'script')
     self.scriptThread = Thread(target=script.run)
     self.scriptThread.start()

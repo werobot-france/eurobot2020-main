@@ -141,6 +141,12 @@ class CommandsManager:
         'arguments': [['state', False]],
         'handler': self.detection
       },
+      {
+        'name': 'getBlindRange',
+        'description': '',
+        'arguments': [],
+        'handler': self.getBlindRange
+      }
     ]
     def filter(item):
       item.pop('handler', None)
@@ -163,6 +169,7 @@ class CommandsManager:
     self.scripts = self.container.get('scripts')
     self.flag = self.container.get('flag')
     self.game = self.container.get('game')
+    self.schlagerDriver = self.container.get('schlager')
   
   '''
   parse the command and return a string with a format type (text or json)
@@ -317,7 +324,7 @@ class CommandsManager:
     self.scripts.stop()
     self.navigation.stop()
     self.platform.stop()
-    self.rightClaw.stop()
+    self.elevator.stop()
     return 'OK'
 
   def parseAngleArgs(self, args):
@@ -413,7 +420,7 @@ class CommandsManager:
     return 'OK'
 
   def schlager(self, args):
-    i = self.container.get('schlager')
+    i = self.schlagerDriver
     if 'pos' not in args:
       i.toggle()
     else:
@@ -433,3 +440,7 @@ class CommandsManager:
       elif args['state'] == 'disable':
         i.stop()
     return 'OK'
+  
+  def getBlindRange(self, args):
+    i = self.container.get('detectionProcess')
+    return i.blindRange

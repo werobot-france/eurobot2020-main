@@ -19,7 +19,7 @@ class Flag:
 
   def open(self):
     self.opened = True
-    self.driver.setAngle(self.servoSlot, 50, 'flag')
+    self.driver.setAngle(self.servoSlot, 80, 'flag')
     self.logger.info('Opened!')
 
   def close(self):

@@ -40,8 +40,8 @@ class Elevator:
     self.right.angle = 55
 
   def close(self, selector = None):
-    self.left.angle = 15
-    self.mid.angle = 23
+    self.left.angle = 13
+    self.mid.angle = 9
     self.right.angle = 163
 
   def sleep(self, selector = None):
@@ -50,9 +50,9 @@ class Elevator:
     self.right.angle = 90
   
   def lighthouse(self, selector = None):
-    self.left.angle = 90
+    self.left.angle = 40
     self.mid.angle = 50
-    self.right.angle = 90
+    self.right.angle = 130
 
   def setAll(self, angles):
     print('SET ALL CLAWS!', angles)

@@ -14,14 +14,15 @@ class DetectionProcess:
     self.container = container
     self.logger = container.get('logger').get('DetectionProcess')
     
-  def start(self):
+  def start(self, blindRange):
     self.enabled = True
+    self.blindRange = blindRange
     self.process = Process(target=self.run)
     self.process.start()
-    self.process.join()
     
   def stop(self):
-    self.process.stop()
+    self.process.terminate()
+    self.process.join()
     self.enabled = False
     
   def toggle(self):
@@ -31,8 +32,6 @@ class DetectionProcess:
       self.start()
   
   def run(self):
-    print('WOOOW')
-    sleep(1)
     container = Container()
     container.set('logger', self.container.get('logger'))
 
@@ -43,10 +42,13 @@ class DetectionProcess:
     container.set('client', client)
 
     detection = Detection(container)
+    detection.blindRange = self.blindRange
     container.set('detection', detection)
 
     lidar = Lidar(container)
     container.set('lidar', lidar)
     
     lidar.start()
-
+    
+    while True:
+      sleep(1)

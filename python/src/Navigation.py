@@ -12,6 +12,7 @@ class Navigation:
     self.positionWatcher = container.get('positionWatcher')
     self.switches = container.get('switches')
     self.enabled = False
+    self.isPaused = False
 
   '''
   Private
@@ -157,6 +158,12 @@ class Navigation:
         
         if stopOn != None:
           self.done = self.switches.getState(stopOn)
+            # Pause the navigation
+
+      # on pose le robot
+      while self.isPaused:
+        self.platform.stop()
+        sleep(1)
 
     #self.positionWatcher.resumeWatchPosition()
     self.platform.stop()
@@ -206,6 +213,11 @@ class Navigation:
         'c': c,
         'deltaOrientation': round(degrees(theta - orientation), 2)
       })
+      
+      # on pose le robot
+      while self.isPaused:
+        self.platform.stop()
+        sleep(1)
     
     #self.positionWatcher.resumeWatchPosition()
     self.platform.stop()
@@ -224,3 +236,11 @@ class Navigation:
     
   def stop(self):
     self.done = True
+
+  def pause(self, state = True):
+    self.isPaused = state
+    self.logger.info('Navigation paused')
+
+  def resume(self):
+    self.isPaused = False
+    self.logger.info('Navigation resumed')

@@ -9,11 +9,29 @@ class Switches:
   right = False
   front = False
   
-  groups = { 'L': 'left', 'R': 'right', 'F': 'front' }
+  groups = {
+    'L': 'left',
+    'R': 'right',
+    'F': 'front',
+    'StartSwitch': 'start',
+    'EmergencySwitch': 'emerg'
+  }
   
-  handlers = { 'leftHandler': None, 'rightHandler': None, 'frontHandler': None }
+  handlers = {
+    'leftHandler': None,
+    'rightHandler': None,
+    'frontHandler': None,
+    'startHandler': None,
+    'emergHandler': None
+  }
   
-  state = { 'right': False, 'left': False, 'front': False }
+  state = {
+    'right': False,
+    'left': False,
+    'front': False,
+    'start': False,
+    'emerg': False
+  }
   
   def __init__(self, container):
     self.logger = container.get('logger').get('Switches')
@@ -33,7 +51,13 @@ class Switches:
         if len(line) == 0:
           break
         comp = line[0:4].split(':')
-        #print(comp[0])
+        
+        if comp[0] == 'Star':
+          comp = line[0:14].split(':')
+        
+        if comp[0] == 'Emer':
+          comp = line[0:18].split(':')
+        
         if comp[0] not in self.groups:
           break
         name = self.groups[comp[0]]
@@ -41,7 +65,7 @@ class Switches:
         #print(name + '=' + str(state))
         handler = self.handlers[name + 'Handler']
         if handler != None:
-          handler(state)
+          Thread(target=handler, args=(state)).start()
         self.state[name] = state
         
         self.logger.debug(self.state)

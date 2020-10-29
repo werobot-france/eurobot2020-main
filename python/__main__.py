@@ -18,6 +18,7 @@ from src.Claw import Claw
 from time import sleep
 from src.Logger import LoggerManager
 from src.Flag import Flag
+from src.Toner import Toner
 from src.Schlager import Schlager
 
 container = Container()
@@ -40,17 +41,19 @@ if __name__ == '__main__':
   scripts = Scripts(container)
   container.set('scripts', scripts)
 
-  game = Game(container)
-  container.set('game', game)
-  
   schlager = Schlager(container)
   container.set('schlager', schlager)
   
   commandsManager = CommandsManager(container)
   container.set('commandsManager', commandsManager)
+  
+  toner = Toner(container)
+  container.set('toner', toner)
+  toner.play(500)
 
   positionWatcher = PositionWatcher(container)
   #positionWatcher.start()
+  positionWatcher.setPos(2000-165, 175, pi)
   container.set('positionWatcher', positionWatcher)
   
   detectionProcess = DetectionProcess(container)
@@ -58,6 +61,9 @@ if __name__ == '__main__':
 
   switches = Switches(container)
   container.set('switches', switches)
+  
+  game = Game(container)
+  container.set('game', game)
 
   driver = PWMDriver()
   container.set('driver', driver)
@@ -89,6 +95,8 @@ if __name__ == '__main__':
     positionWatcher.start()
     
     # REMOVE BEFORE FLIGHT
+    
+    #detectionProcess.start([67.5, 112.5])
     #detectionProcess.start()
     
     root.info('App ready')
@@ -96,6 +104,8 @@ if __name__ == '__main__':
     # navigation.goTo({'x':600, 'y':600, 'orientation':pi })
     # input('You confirm?')
     # navigation.goTo({ 'x': 979, 'y': 1500, 'orientation': pi, 'speed': 40 })
+    # sleep(5)
+    # detectionProcess.blindRange = [40, 40]
     while True:
       sleep(100)
 

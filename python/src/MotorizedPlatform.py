@@ -4,45 +4,31 @@ from time import sleep
 Abstration of motorized platform
 '''
 class MotorizedPlatform:
-
-  driver = None
-
-  #-OLDHOLONOMIC%START
   # escSlots = {
   #   'frontLeft': 15,
   #   'frontRight': 12,
   #   'backLeft': 14,
   #   'backRight': 13
   # }
-  #escSlots = [15, 12, 14, 13]
-  #-OLDHOLONOMIC%END
-  
-  # escSlots = {
-  #   #   'Left': 14,
-  #   #   'Right': 15,
-  # }
-  escSlots = [2, 3]
-  
-  # added for the new version, just to invert the motor command
-  inverted = True
+  escSlots = [15, 12, 14, 13]
+  PWMDriver = None
   
   def __init__(self, container = None):
     self.logger = container.get('logger').get('MotorizedPlatform')
-    self.driver = container.get('driver')
-    if self.driver != None:
+    self.PWMDriver = container.get('driver')
+    if self.PWMDriver != None:
       for slot in self.escSlots:
         # 307 est le signal neutre sous 50 Hz (1.5 / 20 x 4096 = 307)
-        self.driver.setPwm(slot, 0, 307)
+        self.PWMDriver.setPwm(slot, 0, 307)
     else:
       self.logger.warn('mocked!')
-
+      
   def setSpeed(self, values):
     for i in range(len(values)):
-      val = -values[i] if self.inverted else values[i]
-      self.driver.setPwm(
+      self.PWMDriver.setPwm(
         self.escSlots[i],
         0,
-        self.convertSpeedToEsc(val)
+        self.convertSpeedToEsc(values[i])
       )
 
   # équivalent de la fonction map() de arduino
@@ -53,65 +39,60 @@ class MotorizedPlatform:
   def convertSpeedToEsc(self, speed):
     return round(self.mappyt(speed, 0, 100, 307, 410))
   
+  def eastTranslation(self, speed):
+    self.setSpeed({
+      'frontLeft': speed, 'frontRight': speed,
+      'backLeft':  speed,  'backRight': speed
+    })
+  
+  def southTranslation(self, speed):
+    self.northTranslation(-speed)
+
+  def northTranslation(self, speed):
+    self.setSpeed({
+      'frontLeft': speed, 'frontRight': -speed,
+      'backLeft': -speed, 'backRight':  speed
+    })
+
+  def westTranslation(self, speed):
+    self.eastTranslation(- speed)
+
+  def clockwiseRotation(self, speed):
+    a = self.convertSpeedToEsc(speed)
+    r = self.convertSpeedToEsc(-speed)
+    self.setSpeed({
+      'frontLeft': a,
+      'frontRight': a,
+      'backLeft': r,
+      'backRight': r
+    })
+
+  def antiClockwiseRotation(self, speed):
+    self.clockwiseRotation(-speed)
+
+  def northEastTranslation(self, speed):
+    a = self.convertSpeedToEsc(speed)
+    s = self.convertSpeedToEsc(0)
+    self.setSpeed({
+      'frontLeft': a,
+      'frontRight': s,
+      'backLeft': s,
+      'backRight': a
+    })
+
+  def southWestTranslation(self, speed):
+    self.northEastTranslation(-speed)
+
+  def northWestTranslation(self, speed):
+    self.setSpeed({
+      'frontLeft': 0,
+      'frontRight': speed,
+      'backLeft': 0,
+      'backRight': speed
+    })
+
+  def southEastTranslation(self, speed):
+    self.northWestTranslation(-speed)
+
   def stop(self):
-    # the weird syntax with the inline for is used to generate a array filled with zero
-    # with the length which depend on the lenght of the escSlots array
-    self.setSpeed([0 for i in self.escSlots])
-
-  #-OLDHOLONOMIC%START
-  # def eastTranslation(self, speed):
-  #   self.setSpeed({
-  #     'frontLeft': speed, 'frontRight': speed,
-  #     'backLeft':  speed,  'backRight': speed
-  #   })
-  
-  # def southTranslation(self, speed):
-  #   self.northTranslation(-speed)
-
-  # def northTranslation(self, speed):
-  #   self.setSpeed({
-  #     'frontLeft': speed, 'frontRight': -speed,
-  #     'backLeft': -speed, 'backRight':  speed
-  #   })
-
-  # def westTranslation(self, speed):
-  #   self.eastTranslation(- speed)
-
-  # def clockwiseRotation(self, speed):
-  #   a = self.convertSpeedToEsc(speed)
-  #   r = self.convertSpeedToEsc(-speed)
-  #   self.setSpeed({
-  #     'frontLeft': a,
-  #     'frontRight': a,
-  #     'backLeft': r,
-  #     'backRight': r
-  #   })
-
-  # def antiClockwiseRotation(self, speed):
-  #   self.clockwiseRotation(-speed)
-
-  # def northEastTranslation(self, speed):
-  #   a = self.convertSpeedToEsc(speed)
-  #   s = self.convertSpeedToEsc(0)
-  #   self.setSpeed({
-  #     'frontLeft': a,
-  #     'frontRight': s,
-  #     'backLeft': s,
-  #     'backRight': a
-  #   })
-
-  # def southWestTranslation(self, speed):
-  #   self.northEastTranslation(-speed)
-
-  # def northWestTranslation(self, speed):
-  #   self.setSpeed({
-  #     'frontLeft': 0,
-  #     'frontRight': speed,
-  #     'backLeft': 0,
-  #     'backRight': speed
-  #   })
-
-  # def southEastTranslation(self, speed):
-  #   self.northWestTranslation(-speed)
-  #-OLDHOLONOMIC%END
-  
+    self.setSpeed([0, 0, 0, 0])

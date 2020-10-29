@@ -25,6 +25,8 @@ class Lidar:
   communicateThread = None
   
   servoSlot = 4
+  
+  blindRange = [0, 0]
 
   def __init__(self, container):
     self.serial = serial.Serial("/dev/ttyAMA0", 115200)
@@ -87,7 +89,7 @@ class Lidar:
       if self.angle <= 0:
         self.angle = 0
         Thread(target=self.communication, args = [False]).start()
-      
+
       self.driver.setAngle(self.servoSlot, self.angle, 'lidar')
 
       if self.inc:
@@ -112,7 +114,7 @@ class Lidar:
     self.logger.info('Started')
     self.enabled = True
     self.inc = False
-
+    
     self.distanceWatcherThread = Thread(target=self.watchDistances)
     self.distanceWatcherThread.start()
     

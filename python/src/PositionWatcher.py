@@ -11,7 +11,7 @@ class PositionWatcher:
   lateralPerimeter = 60*pi
   
   # distance entre les deux encodeurs latéraux (milieux) (arrête de la base)
-  axialDistance = 284 #280
+  axialDistance = 267 #284 #280
   
   # distance entre l'encodeur arrirère et la droite qui passe par les deux encodeurs latéraux
   backAxialDistance = 110
@@ -71,7 +71,7 @@ class PositionWatcher:
       rightFetchedState = (self.phaseC.value, self.phaseD.value)
       backFetchedState = (self.phaseE.value, self.phaseF.value)
       
-      if not self.setIgnoreSidesChanges:
+      if not self.ignoreSidesChanges:
         if leftFetchedState != self.leftState:
           self.leftState = leftFetchedState
 
@@ -119,7 +119,7 @@ class PositionWatcher:
       
       leftDistance = deltaTicks[0] / 2400 * self.lateralPerimeter
       rightDistance = deltaTicks[1] / 2400 * self.lateralPerimeter
-      backDistance = deltaTicks[2] / 2400 * self.backPerimeter
+      backDistance = deltaTicks[2] / 2400 * self.backPerimeter #* 790/744
 
       #tb = (leftDistance + rightDistance) / 2
       #deltaTheta = 2 * asin((rightDistance - tb) / self.axialDistance)
